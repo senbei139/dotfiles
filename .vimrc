@@ -183,6 +183,8 @@ let g:previm_open_cmd = 'open -a Google\ Chrome'
 " ale
 let g:ale_fixers = { 'ruby': ['rubocop'] }
 
+" ctags
+set tags=.tags
 
 " netrw
 "" ファイル構造をツリー式に表示
