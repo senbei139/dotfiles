@@ -27,4 +27,3 @@ alias less='less -qR'
 
 alias ls='gls --color=auto'
 alias ll='ls -l'
-
