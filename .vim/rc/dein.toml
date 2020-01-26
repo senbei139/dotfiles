@@ -17,6 +17,9 @@ repo = 'Shougo/dein.vim'
 #   let g:dein#plugin.build = cmd
 
 [[plugins]]
+repo = 'w0rp/ale'
+
+[[plugins]]
 repo = 'Shougo/vimshell'
 rev = '3787e5'
 

@@ -15,6 +15,11 @@ repo = 'davidhalter/jedi-vim'
 on_ft = ['python']
 
 
+############# ruby #############
+repo ='tpope/vim-endwise'
+on_ft = ['ruby']
+
+
 ############# typescript #############
 [[plugins]]
 repo = 'delphinus35/typescript-vim'
@@ -42,9 +47,10 @@ repo = 'tokuhirom/jsref'
 
 ############# markdown #############
 [[plugins]]
-repo='plasticboy/vim-markdown'
-repo='previm/previm'
-on_ft =['markdown']
+repo = 'plasticboy/vim-markdown'
+repo = 'previm/previm'
+on_ft = ['markdown']
+
 
 ############# edit #############
 # replace preview
@@ -60,4 +66,4 @@ merged = '0'
 
 [[plugins]]
 repo = 'junegunn/fzf.vim'
-depends = 'fzf'
+depends = ['fzf']

@@ -180,6 +180,10 @@ let g:acp_enableAtStartup = 0
 " for markdonw preview
 let g:previm_open_cmd = 'open -a Google\ Chrome'
 
+" ale
+let g:ale_fixers = { 'ruby': ['rubocop'] }
+
+
 " netrw
 "" ファイル構造をツリー式に表示
 let g:netrw_liststyle=3
