@@ -1,0 +1,63 @@
+[[plugins]]
+repo = 'Shougo/deoplete.nvim'
+on_event = 'InsertEnter'
+hook_add = '''
+  let g:deoplete#enable_at_startup = 1
+'''
+
+[[plugins]]
+repo = 'mustardamus/jqapi'
+
+
+############# python #############
+[[plugins]]
+repo = 'davidhalter/jedi-vim'
+on_ft = ['python']
+
+
+############# typescript #############
+[[plugins]]
+repo = 'delphinus35/typescript-vim'
+rev  = 'colorize-template-strings'
+
+[[plugins]]
+repo  = 'Quramy/tsuquyomi'
+on_ft = ['typescript']
+
+
+############# javascript #############
+[[plugins]]
+repo = 'pangloss/vim-javascript'
+on_ft = ['javascript']
+
+[[plugins]]
+repo = 'tokuhirom/jsref'
+
+
+############# julia #############
+# [[plugins]]
+# repo = 'JuliaEditorSupport/julia-vim'
+# on_ft = ['julia']
+
+
+############# markdown #############
+[[plugins]]
+repo='plasticboy/vim-markdown'
+repo='previm/previm'
+on_ft =['markdown']
+
+############# edit #############
+# replace preview
+[[plugins]]
+repo = 'markonm/traces.vim'
+
+
+############# git #############
+[[plugins]]
+repo = 'junegunn/fzf'
+build = './install --all'
+merged = '0'
+
+[[plugins]]
+repo = 'junegunn/fzf.vim'
+depends = 'fzf'
