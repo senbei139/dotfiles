@@ -33,3 +33,7 @@ alias julia='/usr/local/bin/julia'
 alias less='less -qR'
 alias ls='gls --color=auto'
 alias ll='ls -l'
+
+# git
+fpath=($(brew --prefix)/share/zsh/site-functions $fpath)
+autoload -Uz compinit && compinit
