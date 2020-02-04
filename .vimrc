@@ -75,6 +75,8 @@ set conceallevel=0
 " 画面分割
 " 右に新規windowを作る
 set splitright
+" 下に新規windowを作る
+set splitbelow
 
 set ttimeoutlen=10
 
@@ -188,7 +190,9 @@ set tags=.tags
 
 " netrw
 "" ファイル構造をツリー式に表示
-let g:netrw_liststyle=3
+let g:netrw_liststyle=1
+"" ファイルのソート順
+let g:netrw_sort_by='name'
 " ヘッダを非表示
 let g:netrw_banner=0
 " サイズを(K,M,G)で表示する
