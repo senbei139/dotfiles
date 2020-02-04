@@ -18,12 +18,18 @@ if [ -d "${PYENV_ROOT}" ]; then
   eval "$(pyenv virtualenv-init -)"
 fi
 
+# rbenv
+[[ -d ~/.rbenv  ]] && \
+export PATH=${HOME}/.rbenv/bin:${PATH} && \
+eval "$(rbenv init -)"
+
+# node
 export PATH=$HOME/.nodebrew/current/bin:$PATH
 export PATH=$PATH:./node_modules/.bin
 export NODE_PATH=`npm root -g`
 
 alias julia='/usr/local/bin/julia'
-alias less='less -qR'
 
+alias less='less -qR'
 alias ls='gls --color=auto'
 alias ll='ls -l'
