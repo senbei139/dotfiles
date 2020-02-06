@@ -1,3 +1,5 @@
+language C
+
 "dein Scripts-----------------------------
 augroup PluginInstall
   autocmd!
