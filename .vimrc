@@ -7,11 +7,11 @@ augroup PluginInstall
 augroup END
 
 " Required:
-set runtimepath+=/Users/senbei139/.cache/dein/repos/github.com/Shougo/dein.vim
+set runtimepath+=$HOME/.cache/dein/repos/github.com/Shougo/dein.vim
 
 " Required:
-if dein#load_state('/Users/senbei139/.cache/dein')
-  call dein#begin('/Users/senbei139/.cache/dein')
+if dein#load_state('$HOME/.cache/dein')
+  call dein#begin('$HOME/.cache/dein')
 
   let g:rc_dir = expand('~/.vim/rc')
   let s:toml = g:rc_dir . '/dein.toml'
