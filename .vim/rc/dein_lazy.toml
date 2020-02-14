@@ -1,11 +1,4 @@
 [[plugins]]
-repo = 'Shougo/deoplete.nvim'
-on_event = 'InsertEnter'
-hook_add = '''
-  let g:deoplete#enable_at_startup = 1
-'''
-
-[[plugins]]
 repo = 'mustardamus/jqapi'
 
 
@@ -58,12 +51,10 @@ on_ft = ['markdown']
 repo = 'markonm/traces.vim'
 
 
-############# git #############
+############# rest client #############
 [[plugins]]
-repo = 'junegunn/fzf'
-build = './install --all'
-merged = '0'
+repo = 'baverman/vial'
 
 [[plugins]]
-repo = 'junegunn/fzf.vim'
+repo = 'baverman/vial-http'
 depends = ['fzf']
