@@ -61,7 +61,6 @@ set number
 set title
 set cindent
 set cursorline
-set nocompatible
 set backspace=2
 noremap! ^H <BS>
 
@@ -71,7 +70,6 @@ set statusline=%y
 set showmatch
 set ruler
 set nu
-
 set conceallevel=0
 
 " 画面分割
