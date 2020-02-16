@@ -57,4 +57,3 @@ repo = 'baverman/vial'
 
 [[plugins]]
 repo = 'baverman/vial-http'
-depends = ['fzf']

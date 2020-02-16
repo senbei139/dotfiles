@@ -194,7 +194,7 @@ let g:netrw_liststyle=1
 "" ファイルのソート順
 let g:netrw_sort_by='name'
 " ヘッダを非表示
-let g:netrw_banner=0
+" let g:netrw_banner=0
 " サイズを(K,M,G)で表示する
 let g:netrw_sizestyle="H"
 " 日付フォーマットを yyyy/mm/dd(曜日) hh:mm:ss で表示する
