@@ -182,11 +182,12 @@ let g:acp_enableAtStartup = 0
 " for markdonw preview
 let g:previm_open_cmd = 'open -a Google\ Chrome'
 
-" ale
-let g:ale_fixers = { 'ruby': ['rubocop'] }
 
-" ctags
-set tags=.tags
+" vim-lsp
+let g:lsp_async_completion = 1
+"let g:lsp_log_verbose = 1
+"let g:lsp_log_file = expand("~/vim-lsp.log")
+let g:lsp_diagnostics_enabled = 1
 
 " netrw
 "" ファイル構造をツリー式に表示
