@@ -28,12 +28,14 @@ export PATH=$HOME/.nodebrew/current/bin:$PATH
 export PATH=$PATH:./node_modules/.bin
 export NODE_PATH=`npm root -g`
 
-alias julia='/usr/local/bin/julia'
-
-alias less='less -qR'
-alias ls='gls --color=auto'
-alias ll='ls -l'
-
 # git
 fpath=($(brew --prefix)/share/zsh/site-functions $fpath)
 autoload -Uz compinit && compinit
+
+# alias
+alias julia='/usr/local/bin/julia'
+alias less='less -qR'
+alias ls='gls --color=auto'
+alias ll='ls -l'
+alias glog='git log --graph --all --format="%x09%C(cyan bold)%an%Creset%x09%C(yellow)%h%Creset %C(magenta reverse)%d%Creset %s"'
+

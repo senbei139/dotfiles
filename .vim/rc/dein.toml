@@ -17,7 +17,13 @@ repo = 'Shougo/dein.vim'
 #   let g:dein#plugin.build = cmd
 
 [[plugins]]
-repo = 'w0rp/ale'
+repo = 'prabirshrestha/async.vim'
+
+[[plugins]]
+repo = 'prabirshrestha/vim-lsp'
+
+[[plugins]]
+repo = 'mattn/vim-lsp-settings'
 
 [[plugins]]
 repo = 'Shougo/vimshell'
