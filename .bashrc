@@ -40,4 +40,9 @@ alias ls='ls -FG'
 alias ll='ls -alFG'
 
 alias glog='git log --graph --all --format="%x09%C(cyan bold)%an%Creset%x09%C(yellow)%h%Creset %C(magenta reverse)%d%Creset %s"'
-[ -f ~/.fzf.bash ] && source ~/.fzf.bash
+
+cdf() {
+   local file
+   local dir
+   file=$(fzf +m -q "$1") && dir=$(dirname "$file") && cd "$dir"
+}
