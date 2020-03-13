@@ -38,25 +38,22 @@ endif
 " Required:
 filetype plugin indent on
 
-
-" let g:molokai_original = 1
-" let g:rehash256 = 1
-"
-" syntax highlight
-set sm
-set ai
-syntax on
 let java_highlight_all=1
 let java_highlight_functions="style"
 let java_allow_cpp_keywords=1
 
+" color
 syntax enable
 set background=dark
+autocmd ColorScheme * highlight Normal ctermbg=none
+autocmd ColorScheme * highlight LineNr ctermbg=none
 colorscheme solarized
+set t_Co=256
 
+
+" 表示系
 set encoding=utf-8
 scriptencoding utf-8
-set t_Co=256
 set number
 set title
 set cindent
@@ -64,13 +61,23 @@ set cursorline
 set backspace=2
 noremap! ^H <BS>
 
-" 表示系
 set laststatus=2
 set statusline=%y
 set showmatch
 set ruler
 set nu
 set conceallevel=0
+
+" indent
+" 不可視文字を可視化(タブが「▸-」と表示される)
+" set list listchars=tab:>-,extends:>,nbsp:%
+set expandtab " タブ入力を複数の空白入力に置き換える
+set tabstop=2 " 画面上でタブ文字が占める幅
+set softtabstop=2 " 連続した空白に対してタブキーやバックスペースキーでカーソルが動く幅
+set autoindent " 改行時に前の行のインデントを継続する
+set smartindent " 改行時に前の行の構文をチェックし次の行のインデントを増減する
+set shiftwidth=2 " smartindentで増減する幅
+
 
 " 画面分割
 " 右に新規windowを作る
@@ -98,16 +105,6 @@ set fileencoding=utf-8 " 保存時の文字コード
 set fileencodings=ucs-boms,utf-8,euc-jp,cp932,sjis " 読み込み時の文字コードの自動判別. 左側が優先される
 set fileformats=unix,dos,mac " 改行コードの自動判別. 左側が優先される
 set ambiwidth=double " □や○文字が崩れる問題を解決
-
-" Tab系
-" 不可視文字を可視化(タブが「▸-」と表示される)
-" set list listchars=tab:>-,extends:>,nbsp:%
-set expandtab " タブ入力を複数の空白入力に置き換える
-set tabstop=2 " 画面上でタブ文字が占める幅
-set softtabstop=2 " 連続した空白に対してタブキーやバックスペースキーでカーソルが動く幅
-set autoindent " 改行時に前の行のインデントを継続する
-set smartindent " 改行時に前の行の構文をチェックし次の行のインデントを増減する
-set shiftwidth=2 " smartindentで増減する幅
 
 if has("autocmd")
   " sw=softtabstop, sts=shiftwidth, ts=tabstop, et=expandtab
@@ -145,9 +142,9 @@ set hlsearch " 検索結果をハイライト
 set clipboard+=unnamed
 
 " コマンド補完
-set wildmode=longest:full,full
 set wildmenu " コマンドモードの補完
-set history=200 " 保存するコマンド履歴の数
+set wildmode=longest:full,full
+set history=100 " 保存するコマンド履歴の数
 set showcmd
 
 " マウス有効化
@@ -176,6 +173,9 @@ if &term =~ "xterm"
   inoremap <special> <expr> <Esc>[200~ XTermPasteBegin("")
 endif
 
+" Buffers
+set hidden
+
 " Disable AutoComplPop.
 let g:acp_enableAtStartup = 0
 
@@ -188,11 +188,11 @@ let g:lsp_async_completion = 1
 "let g:lsp_log_verbose = 1
 "let g:lsp_log_file = expand("~/vim-lsp.log")
 let g:lsp_diagnostics_enabled = 1
+nnoremap <expr> <silent> <C-]> execute(':LspDefinition') =~ "not supported" ? "\<C-]>" : ":echo<cr>"
+
 
 " netrw
-"" ファイル構造をツリー式に表示
 let g:netrw_liststyle=1
-"" ファイルのソート順
 let g:netrw_sort_by='name'
 " ヘッダを非表示
 " let g:netrw_banner=0
@@ -202,3 +202,4 @@ let g:netrw_sizestyle="H"
 let g:netrw_timefmt="%Y/%m/%d(%a) %H:%M:%S"
 " プレビューウィンドウを垂直分割で表示する
 let g:netrw_preview=1
+let g:netrw_winsize = 70
