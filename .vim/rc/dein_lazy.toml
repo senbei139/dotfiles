@@ -57,3 +57,8 @@ repo = 'baverman/vial'
 
 [[plugins]]
 repo = 'baverman/vial-http'
+
+
+############# docker #############
+[[plugins]]
+repo = 'skanehira/docker.vim'

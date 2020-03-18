@@ -1,9 +1,6 @@
 export PATH=/sbin:/usr/local/bin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin
 
-PROMPT='%F{4}@%m%f %c $ '
-# RPROMPT='%*'
-
-eval $(gdircolors ~/dotfiles/colors/dircolors-solarized/dircolors.ansi-universal)
+PROMPT='%F{044}@%m%f %c $ '
 
 export TERM=xterm-256color
 
@@ -11,8 +8,8 @@ export HISTCONTROL=ignoredups
 
 # pyenv
 export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
 if [ -d "${PYENV_ROOT}" ]; then
-  export PATH="$PYENV_ROOT/bin:$PATH"
   eval "$(pyenv init -)"
 fi
 
@@ -34,6 +31,14 @@ autoload -Uz compinit && compinit
 alias julia='/usr/local/bin/julia'
 alias less='less -qR'
 alias ls='gls --color=auto'
-alias ll='ls -l'
+alias ll='ls -lFG'
+alias la='ls -alFG'
 alias glog='git log --graph --all --format="%x09%C(cyan bold)%an%Creset%x09%C(yellow)%h%Creset %C(magenta reverse)%d%Creset %s"'
 
+alias julia='/usr/local/bin/julia'
+
+cdf() {
+   local file
+   local dir
+   file=$(fzf +m -q "$1") && dir=$(dirname "$file") && cd "$dir"
+}
