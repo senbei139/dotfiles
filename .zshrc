@@ -37,8 +37,28 @@ alias glog='git log --graph --all --format="%x09%C(cyan bold)%an%Creset%x09%C(ye
 
 alias julia='/usr/local/bin/julia'
 
-cdf() {
-   local file
-   local dir
-   file=$(fzf +m -q "$1") && dir=$(dirname "$file") && cd "$dir"
+# fzf
+# export FZF_DEFAULT_OPTS="--height 50% --layout=reverse --border --inline-info --preview 'head -100 {}'"
+alias vimf='vim `find "$1" -type f | fzf`'
+alias vimd='vim `find "$1" -type d | fzf`'
+
+fd() {
+  local dir
+  dir=$(find ${1:-.} -path '*/\.*' -prune -o -type d -print 2> /dev/null | fzf +m) &&
+  cd "$dir"
 }
+
+asis() {
+  curl -XPOST -u "apikey:VjcQkdj-rCxaRc0hdyUtGqGZlmJtB3Tkc0CHwblKlubC" --header "Content-Type:application/json" --data "{\"input\": {\"text\": \"${1}\"}}" "https://gateway-tok.watsonplatform.net/assistant/api/v1/workspaces/513cf3af-82d7-4229-818c-03beee65ab82/message?version=2018-09-20" | jq
+}
+
+bomy() {
+  local output
+  output='bom_'${1}
+  cat <(printf "\xEF\xBB\xBF") ${1} > $output
+}
+
+
+alias ls='ls -GF'
+alias ll='ls -lFG'
+alias la='ls -alFG'
