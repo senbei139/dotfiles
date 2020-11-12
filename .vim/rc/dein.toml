@@ -18,12 +18,16 @@ repo = 'Shougo/dein.vim'
 
 [[plugins]]
 repo = 'prabirshrestha/async.vim'
+merged = 0
 
 [[plugins]]
 repo = 'prabirshrestha/vim-lsp'
 
 [[plugins]]
 repo = 'mattn/vim-lsp-settings'
+
+[[plugins]]
+repo = 'editorconfig/editorconfig-vim'
 
 [[plugins]]
 repo = 'Shougo/vimshell'
@@ -41,6 +45,9 @@ repo = 'vim-scripts/taglist.vim'
 
 [[plugins]]
 repo = 'airblade/vim-gitgutter'
+hood_add = '''
+  set updatetime=500
+'''
 
 # Git operation
 [[plugins]]
