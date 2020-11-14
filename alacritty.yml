@@ -1,0 +1,18 @@
+shell:
+  program: /bin/zsh
+
+live_config_reload: true
+
+# Window
+window:
+  decorations: buttonless
+  title: term
+# Font
+font:
+  size: 12.5
+  family: Myrica M
+
+key_bindings:
+  - { key: Space, mods: Control, chars: "\x00" }
+
+# Colors

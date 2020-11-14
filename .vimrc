@@ -211,7 +211,6 @@ let g:netrw_sort_by='name'
 let g:netrw_sizestyle="H"
 let g:netrw_timefmt="%Y/%m/%d(%a) %H:%M:%S"
 let g:netrw_preview=1
-let g:netrw_winsize = 70
 
 set diffopt=filler
 
