@@ -1,0 +1,75 @@
+shell:
+  program: /bin/zsh
+
+live_config_reload: true
+
+window:
+  decorations: buttonless
+  title: term
+  padding:
+    x: 2
+    y: 2
+  dynamic_padding: true
+
+font:
+  size: 12.5
+  normal:
+    family: SauceCodePro Nerd Font
+    style: Regular
+  bold:
+    family: SauceCodePro Nerd Font
+    style: Regular
+  italic:
+    family: SauceCodePro Nerd Font
+    style: Regular
+
+key_bindings:
+  - { key: Space, mods: Control, chars: "\x00" }
+
+colors:
+  primary:
+    background: '#212121'
+    foreground: '#fafafa'
+
+    dim_foreground: '#eff0f1'
+    bright_foreground: '#ffffff'
+    dim_background: '#31363b'
+    bright_background: '#000000'
+
+  # cursor:
+    # text: '#fefff2'
+    # cursor: '#f0cc09'
+
+  selection:
+    text: '#b5b500'
+    background: '#18354f'
+
+  normal:
+    black:   '#073642' # base02
+    red:     '#dc322f' # red
+    green:   '#859900' # green
+    yellow:  '#b58900' # yellow
+    blue:    '#268bd2' # blue
+    magenta: '#d33682' # magenta
+    cyan:    '#07beb8' # user name
+    white:   '#eee8d5' # base2
+
+  bright:
+    black:   '#002b36' # base03
+    red:     '#cb4b16' # orange
+    green:   '#ff9f1c' # vim normal mode bg
+    yellow:  '#457b9d' # line num
+    blue:    '#839496' # base0
+    magenta: '#ef8354' # string number value
+    cyan:    '#619b8a' # func name, yaml key, commentout
+    white:   '#5517ff' # vim tab fg
+
+  dim:
+    black:   '#232323'
+    red:     '#74423f'
+    green:   '#5e6547'
+    yellow:  '#8b7653'
+    blue:    '#556b79'
+    magenta: '#6e4962'
+    cyan:    '#5c8482'
+    white:   '#828282'

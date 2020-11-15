@@ -1,43 +1,3 @@
-[[plugins]]
-repo = 'mustardamus/jqapi'
-
-
-############# python #############
-[[plugins]]
-repo = 'davidhalter/jedi-vim'
-on_ft = ['python']
-
-
-############# ruby #############
-repo ='tpope/vim-endwise'
-on_ft = ['ruby']
-
-
-############# typescript #############
-[[plugins]]
-repo = 'delphinus35/typescript-vim'
-rev  = 'colorize-template-strings'
-
-[[plugins]]
-repo  = 'Quramy/tsuquyomi'
-on_ft = ['typescript']
-
-
-############# javascript #############
-[[plugins]]
-repo = 'pangloss/vim-javascript'
-on_ft = ['javascript']
-
-[[plugins]]
-repo = 'tokuhirom/jsref'
-
-
-############# julia #############
-# [[plugins]]
-# repo = 'JuliaEditorSupport/julia-vim'
-# on_ft = ['julia']
-
-
 ############# markdown #############
 [[plugins]]
 repo = 'plasticboy/vim-markdown'
@@ -62,3 +22,15 @@ repo = 'baverman/vial-http'
 ############# docker #############
 [[plugins]]
 repo = 'skanehira/docker.vim'
+
+
+############# vim #############
+[[plugins]]
+repo = "puremourning/vimspector"
+on_ft = ["python", "javascript", "typescript"]
+build = "./install_gadget.py --enable-python --force-enable-node"
+
+
+############# go #############
+[[plugins]]
+repo = "mattn/vim-goimports"
