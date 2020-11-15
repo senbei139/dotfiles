@@ -41,10 +41,10 @@ let java_allow_cpp_keywords=1
 
 " color
 syntax enable
-set background=dark
+" set background=dark
 autocmd ColorScheme * highlight Normal ctermbg=none
 autocmd ColorScheme * highlight LineNr ctermbg=none
-colorscheme solarized
+" colorscheme solarized
 set t_Co=256
 
 
