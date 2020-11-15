@@ -56,7 +56,6 @@ fd() {
   cd "$dir"
 }
 
-<<<<<<< Updated upstream
 asis() {
   curl -XPOST -u "apikey:VjcQkdj-rCxaRc0hdyUtGqGZlmJtB3Tkc0CHwblKlubC" --header "Content-Type:application/json" --data "{\"input\": {\"text\": \"${1}\"}}" "https://gateway-tok.watsonplatform.net/assistant/api/v1/workspaces/513cf3af-82d7-4229-818c-03beee65ab82/message?version=2018-09-20" | jq
 }
@@ -75,10 +74,9 @@ alias suuid='echo a65d9977-eba3-bc2a-1ff5-1f585d06da15'
 alias ls='ls -GF'
 alias ll='ls -lFG'
 alias la='ls -alFG'
-=======
+
 # The next line updates PATH for the Google Cloud SDK.
 if [ -f '/Users/senbei139/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/senbei139/google-cloud-sdk/path.zsh.inc'; fi
 
 # The next line enables shell command completion for gcloud.
 if [ -f '/Users/senbei139/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/senbei139/google-cloud-sdk/completion.zsh.inc'; fi
->>>>>>> Stashed changes
