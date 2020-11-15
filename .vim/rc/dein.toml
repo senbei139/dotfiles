@@ -23,8 +23,7 @@ merged = 0
 [[plugins]]
 repo = 'prabirshrestha/vim-lsp'
 
-[[plugins]]
-repo = 'mattn/vim-lsp-settings'
+############# julia #############
 
 [[plugins]]
 repo = 'editorconfig/editorconfig-vim'
@@ -52,6 +51,9 @@ repo = 'tpope/vim-fugitive'
 
 [[plugins]]
 repo = 'Yggdroot/indentLine'
+
+[[plugins]]
+repo = 'editorconfig/editorconfig-vim'
 
 
 # 依存関係を指定したいとき

@@ -1,4 +1,5 @@
 language C
+scriptencoding utf-8
 
 "dein Scripts-----------------------------
 augroup PluginInstall
@@ -25,9 +26,6 @@ if dein#load_state('$HOME/.cache/dein')
   call dein#save_state()
 endif
 
-" Required:
-filetype plugin indent on
-
 if dein#check_install()
   call dein#install()
 endif
@@ -50,13 +48,11 @@ set t_Co=256
 
 " display
 set encoding=utf-8
-scriptencoding utf-8
 set number
 set title
-set cindent
 set cursorline
 set backspace=2
-noremap! ^H <BS>
+"noremap! ^H <BS>
 
 set laststatus=2
 set statusline=%y
@@ -64,6 +60,7 @@ set showmatch
 set ruler
 set nu
 set conceallevel=0
+let g:vim_json_syntax_concesal=0
 
 " indent
 set expandtab
@@ -215,7 +212,6 @@ let g:netrw_winsize = 70
 
 
 set diffopt=filler
-
 
 " open binary file
 augroup BinaryXXD

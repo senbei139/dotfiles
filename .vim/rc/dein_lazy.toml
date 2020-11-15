@@ -1,24 +1,3 @@
-############# markdown #############
-[[plugins]]
-repo = 'plasticboy/vim-markdown'
-repo = 'previm/previm'
-on_ft = ['markdown']
-
-
-############# edit #############
-# replace preview
-[[plugins]]
-repo = 'markonm/traces.vim'
-
-
-############# rest client #############
-[[plugins]]
-repo = 'baverman/vial'
-
-[[plugins]]
-repo = 'baverman/vial-http'
-
-
 ############# docker #############
 [[plugins]]
 repo = 'skanehira/docker.vim'
