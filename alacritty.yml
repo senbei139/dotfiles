@@ -7,20 +7,20 @@ window:
   decorations: buttonless
   title: term
   padding:
-    x: 2
+    x: 4
     y: 2
   dynamic_padding: true
 
 font:
   size: 12.5
   normal:
-    family: SauceCodePro Nerd Font
+    family: Roboto
     style: Regular
   bold:
-    family: SauceCodePro Nerd Font
+    family: Roboto
     style: Regular
   italic:
-    family: SauceCodePro Nerd Font
+    family: Roboto
     style: Regular
 
 key_bindings:
@@ -64,12 +64,12 @@ colors:
     cyan:    '#619b8a' # func name, yaml key, commentout
     white:   '#5517ff' # vim tab fg
 
-  dim:
-    black:   '#232323'
-    red:     '#74423f'
-    green:   '#5e6547'
-    yellow:  '#8b7653'
-    blue:    '#556b79'
-    magenta: '#6e4962'
-    cyan:    '#5c8482'
-    white:   '#828282'
+#  dim:
+#    black:   '#232323'
+#    red:     '#74423f'
+#    green:   '#5e6547'
+#    yellow:  '#8b7653'
+#    blue:    '#556b79'
+#    magenta: '#6e4962'
+#    cyan:    '#5c8482'
+#    white:   '#828282'
