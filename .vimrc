@@ -50,7 +50,6 @@ set t_Co=256
 set encoding=utf-8
 set number
 set title
-set cursorline
 set backspace=2
 "noremap! ^H <BS>
 
@@ -83,6 +82,7 @@ set cmdwinheight=20
 autocmd BufWritePre * :%s/\s\+$//ge
 
 " cursor
+set nocursorline
 if has('vim_starting')
     " blink pipe cursor when input mode
     let &t_SI .= "\e[5 q"
