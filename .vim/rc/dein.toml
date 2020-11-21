@@ -23,11 +23,6 @@ merged = 0
 [[plugins]]
 repo = 'prabirshrestha/vim-lsp'
 
-############# julia #############
-
-[[plugins]]
-repo = 'editorconfig/editorconfig-vim'
-
 [[plugins]]
 repo = 'Shougo/vimshell'
 rev = '3787e5'
