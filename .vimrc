@@ -39,14 +39,12 @@ let java_allow_cpp_keywords=1
 
 " color
 syntax enable
+set t_Co=256
+set background=dark
+" colorscheme PaperColor
+
 autocmd ColorScheme * highlight Normal ctermbg=none
 autocmd ColorScheme * highlight LineNr ctermbg=none
-" colorscheme solarized
-colorscheme gruvbox
-set background=dark
-set t_Co=256
-let g:ligthline = { 'colorscheme': 'gruvbox' }
-
 
 
 " display
@@ -160,8 +158,6 @@ set showcmd
 if has('mouse')
   set mouse=a
   if has('mouse_sgr')
-    set ttymouse=sgr
-  elseif v:version > 703 || v:version is 703 && has('patch632')
     set ttymouse=sgr
   else
     set ttymouse=xterm2
