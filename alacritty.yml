@@ -12,7 +12,7 @@ window:
   dynamic_padding: true
 
 font:
-  size: 12.5
+  size: 13
   normal:
     family: Roboto
     style: Regular
@@ -25,6 +25,9 @@ font:
 
 key_bindings:
   - { key: Space, mods: Control, chars: "\x00" }
+  - { key: Yen, chars: "\x5C" }
+  - { key: Yen, mods: Alt, chars: "\x5C" }
+
 
 colors:
   primary:
