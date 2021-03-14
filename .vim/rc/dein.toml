@@ -20,8 +20,12 @@ repo = 'Shougo/dein.vim'
 repo = 'prabirshrestha/async.vim'
 merged = 0
 
+# LSP
 [[plugins]]
 repo = 'prabirshrestha/vim-lsp'
+
+[[plugins]]
+repo = 'mattn/vim-lsp-settings'
 
 [[plugins]]
 repo = 'Shougo/vimshell'
