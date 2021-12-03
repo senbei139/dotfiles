@@ -38,14 +38,12 @@ let java_highlight_functions="style"
 let java_allow_cpp_keywords=1
 
 " color
-syntax enable
+syntax on
 set t_Co=256
 set background=dark
-" colorscheme PaperColor
 
 autocmd ColorScheme * highlight Normal ctermbg=none
 autocmd ColorScheme * highlight LineNr ctermbg=none
-
 
 " display
 set encoding=utf-8
@@ -100,6 +98,7 @@ set ambiwidth=double " prevent Garbled characters
 if has("autocmd")
   " sw=shiftwidth, sts=softtabstop, ts=tabstop, et=expandtab
   autocmd FileType c           setlocal sw=4 sts=4 ts=4 et
+  autocmd FileType cpp         setlocal sw=4 sts=4 ts=4 et
   autocmd FileType html        setlocal sw=4 sts=4 ts=4 et
   autocmd FileType xml         setlocal sw=4 sts=4 ts=4 et
   autocmd FileType ruby        setlocal sw=2 sts=2 ts=2 et
@@ -109,14 +108,23 @@ if has("autocmd")
   autocmd FileType python      setlocal sw=4 sts=4 ts=4 et
   autocmd FileType scala       setlocal sw=2 sts=2 ts=2 et
   autocmd FileType json        setlocal sw=2 sts=2 ts=2 et
-  autocmd FileType html        setlocal sw=4 sts=4 ts=4 et
+  autocmd FileType swift       setlocal sw=4 sts=4 ts=4 et
   autocmd FileType css         setlocal sw=2 sts=2 ts=2 et
   autocmd FileType scss        setlocal sw=2 sts=2 ts=2 et
   autocmd FileType sass        setlocal sw=2 sts=2 ts=2 et
   autocmd FileType javascript  setlocal sw=2 sts=2 ts=2 et
   autocmd FileType typescript  setlocal sw=2 sts=2 ts=2 et
   autocmd FileType go          setlocal sw=4 sts=4 ts=4
+  autocmd FileType yaml        setlocal sw=2 sts=2 ts=2 et
 endif
+
+let g:quickrun_config = get(g:, 'quickrun_config', {})
+let g:quickrun_config._ = {
+      \ 'outputter/buffer/opener': 'new',
+      \ 'outputter/buffer/into': 1,
+      \ 'outputter/buffer/close_on_empty': 1,
+      \ }
+nnoremap <silent><leader>r :QuickRun<CR>
 
 " undo
 if has('persistent_undo')
@@ -166,6 +174,10 @@ endif
 
 " Buffers
 set hidden
+nnoremap <silent><C-p> :bprevious<CR>
+nnoremap <silent><C-n> :bnext<CR>
+nnoremap <silent>:ls<CR> :Files<CR>
+nnoremap <silent>:bf<CR> :Buffers<CR>
 
 " Disable AutoComplPop.
 let g:acp_enableAtStartup = 0
@@ -180,13 +192,12 @@ let g:lsp_signs_warning = {'text': 'W'}
 let g:lsp_async_completion = 1
 "let g:lsp_log_verbose = 1
 "let g:lsp_log_file = expand("~/vim-lsp.log")
-nnoremap <expr> <silent> <C-]> execute(':LspDefinition') =~ "not supported" ? "\<C-]>" : ":echo<cr>"
+nnoremap <expr> <silent> <C-]> execute(':LspDefinition') =~ "not supported" ? "\<C-]>" : ":echo<CR>"
+" nnoremap <silent> :LspNextError<CR>
+" nnoremap <silent> :LspPreviousError<CR>
 
 
 command! Jq :%!jq '.'
-
-command! Puuid :%!puuid
-command! Suuid :%!suuid
 
 " airline
 if !exists('g:airline_symbols')
