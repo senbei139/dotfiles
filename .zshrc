@@ -13,9 +13,8 @@ export PYTHONIOENCODING=utf-8
 # pyenv
 export PYENV_ROOT="$HOME/.pyenv"
 export PATH="$PYENV_ROOT/bin:$PATH"
-if command -v pyenv 1>/dev/null 2>&1; then
-  eval "$(pyenv init -)"
-fi
+eval "$(pyenv init --path)"
+eval "$(pyenv init -)"
 
 # rbenv
 [[ -d ~/.rbenv  ]] && \
@@ -31,9 +30,10 @@ export PATH=$PATH:./node_modules/.bin
 export NODE_PATH=`npm root -g`
 
 # golang
-export GOPATH=$HOME/go
-export GOROOT=$( go env GOROOT )
+export GOPATH=/usr/local/bin/go
+export GOROOT=/usr/local/opt/go/libexec
 export PATH=$GOPATH/bin:$PATH
+export PATH=$PATH:$GOPATH/bin
 
 # git
 fpath=($(brew --prefix)/share/zsh/site-functions $fpath)
@@ -46,18 +46,17 @@ alias glog='git log --graph --all --format="%x09%C(cyan bold)%an%Creset%x09%C(ye
 
 
 # fzf
-# export FZF_DEFAULT_OPTS="--height 50% --layout=reverse --border --inline-info --preview 'head -100 {}'"
+export PATH="$PATH:$HOME/.fzf/bin"
+#export FZF_DEFAULT_COMMAND='rg --files --hidden --glob "!.git"'
+#export FZF_DEFAULT_OPTS="--height 50% --layout=reverse --border --inline-info --preview 'head -100 {}'"
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 alias vimf='vim `find "$1" -type f | fzf`'
 alias vimd='vim `find "$1" -type d | fzf`'
 
 fd() {
   local dir
-  dir=$(find ${1:-~/workspace} -path '*/\.*' -prune -o -type d -print 2> /dev/null | fzf +m) &&
+  dir=$(find ${1:-~/workspace} -type d \( -name 'node_modules' -o -name 'vendors' -o -name 'data' -o -name 'dataset' -o -name 'tmp' -o -name '.git' \) -prune -path '*/\.*' -o -type d -print 2> /dev/null | fzf +m) &&
   cd "$dir"
-}
-
-asis() {
-  curl -XPOST -u "apikey:VjcQkdj-rCxaRc0hdyUtGqGZlmJtB3Tkc0CHwblKlubC" --header "Content-Type:application/json" --data "{\"input\": {\"text\": \"${1}\"}}" "https://gateway-tok.watsonplatform.net/assistant/api/v1/workspaces/513cf3af-82d7-4229-818c-03beee65ab82/message?version=2018-09-20" | jq
 }
 
 bomy() {
@@ -66,10 +65,10 @@ bomy() {
   cat <(printf "\xEF\xBB\xBF") ${1} > $output
 }
 
-
-alias uuid='uuidgen | tr [:upper:] [:lower:]'
-alias puuid='echo e7ac4d91-d1bc-f151-babc-cd0e50243e99'
-alias suuid='echo a65d9977-eba3-bc2a-1ff5-1f585d06da15'
+# BOM確認 16進数表示
+bomcheck() {
+  hexdump ${1} | head -n 1
+}
 
 alias ls='ls -GF'
 alias ll='ls -lFG'
