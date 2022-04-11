@@ -11,3 +11,4 @@ jquery-*.js
 *.tags*
 *.gemtags*
 *.tmp*
+dataset

@@ -216,13 +216,13 @@
 				<key>Alpha Component</key>
 				<real>1</real>
 				<key>Blue Component</key>
-				<real>0.78216177225112915</real>
+				<real>0.77513802051544189</real>
 				<key>Color Space</key>
 				<string>sRGB</string>
 				<key>Green Component</key>
-				<real>0.26474356651306152</real>
+				<real>0.6413248101608755</real>
 				<key>Red Component</key>
-				<real>0.15404300391674042</real>
+				<real>0.46742729626704715</real>
 			</dict>
 			<key>Ansi 5 Color</key>
 			<dict>
@@ -732,7 +732,7 @@
 			<key>Non-ASCII Anti Aliased</key>
 			<true/>
 			<key>Normal Font</key>
-			<string>Courier 13</string>
+			<string>Courier 14.5</string>
 			<key>Only The Default BG Color Uses Transparency</key>
 			<false/>
 			<key>Option Key Sends</key>

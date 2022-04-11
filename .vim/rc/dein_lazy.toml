@@ -8,3 +8,15 @@ build = "./install_gadget.py --enable-python --force-enable-node"
 ############# go #############
 [[plugins]]
 repo = "mattn/vim-goimports"
+
+
+############# cpp #############
+[[plugins]]
+repo = "thinca/vim-quickrun"
+
+[[plugins]]
+repo = "justmao945/vim-clang"
+
+############# nim #############
+[[plugins]]
+repo = "zah/nim.vim"
