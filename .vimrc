@@ -178,6 +178,8 @@ nnoremap <silent><C-p> :bprevious<CR>
 nnoremap <silent><C-n> :bnext<CR>
 nnoremap <silent>:ls<CR> :Files<CR>
 nnoremap <silent>:bf<CR> :Buffers<CR>
+nnoremap <silent><leader>f :Files<CR>
+nnoremap <silent><leader>b :Buffers<CR>
 
 " Disable AutoComplPop.
 let g:acp_enableAtStartup = 0
@@ -240,3 +242,20 @@ function! DebugVimspector()
 endfunction
 
 command! Dbg call DebugVimspector()
+
+
+" open browser command, deafult is 'open'
+let g:docker_open_browser_cmd = 'open'
+
+" split temrinal windows, can use vert or tab, etc...
+" see :h vert
+let g:docker_terminal_open = 'bo'
+
+" check plugin's version when plugin loading.
+" default is checking.
+" If you not want to check, please set 0 to this option.
+let g:docker_plugin_version_check = 1
+
+" Set value to 1 can enable using tmux to attach container.
+" default value: 0
+let g:docker_use_tmux = 1
