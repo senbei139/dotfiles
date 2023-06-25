@@ -58,6 +58,8 @@
 	<integer>262401</integer>
 	<key>JobName</key>
 	<true/>
+	<key>LeftTabBarWidth</key>
+	<real>151</real>
 	<key>MaxVertically</key>
 	<false/>
 	<key>New Bookmarks</key>

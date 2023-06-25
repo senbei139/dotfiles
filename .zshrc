@@ -1,4 +1,4 @@
-export PATH=/sbin:/usr/local/bin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin
+export PATH=/usr/local/bin:/usr/bin:/bin:/sbin:/usr/sbin:/usr/local/sbin:$HOME/workspace/ml-agents/ml-agents
 
 export LANG=ja_JP.UTF-8
 export TERM=xterm-256color
@@ -7,33 +7,28 @@ export HISTCONTROL=ignoredups
 setopt nonomatch
 export HISTSIZE=1000
 
+export PATH=$PATH:/Users/senbei139/Library/Android/sdk/platform-tools
+export JAVA_HOME=/Applications/Android\ Studio.app/Contents/jre/Contents/Home
+
+export ANDROID_SDK_ROOT=$HOME/Library/Android/sdk
+export PATH=$PATH:$ANDROID_SDK_ROOT/emulator
+export PATH=$PATH:$ANDROID_SDK_ROOT/platform-tools
+export SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
+
+# c
+export PATH="/usr/local/opt/llvm/bin:$PATH"
+export LDFLAGS="-L/usr/local/opt/llvm/lib"
+export CPPFLAGS="-I/usr/local/opt/llvm/include"
+
 # python
 export PYTHONIOENCODING=utf-8
-
-# pyenv
-export PYENV_ROOT="$HOME/.pyenv"
-export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init --path)"
-eval "$(pyenv init -)"
-
-# rbenv
-[[ -d ~/.rbenv  ]] && \
-export PATH=${HOME}/.rbenv/bin:${PATH} && \
-eval "$(rbenv init -)"
-export SECRET_KEY_BASE=`rails secret`
-
-# node
-export PATH="$HOME/.nodenv/bin:$PATH"
-eval "$(nodenv init -)"
 
 export PATH=$PATH:./node_modules/.bin
 export NODE_PATH=`npm root -g`
 
 # golang
-export GOPATH=/usr/local/bin/go
 export GOROOT=/usr/local/opt/go/libexec
-export PATH=$GOPATH/bin:$PATH
-export PATH=$PATH:$GOPATH/bin
+export PATH=$PATH:$GOROOT/bin
 
 # git
 fpath=($(brew --prefix)/share/zsh/site-functions $fpath)
@@ -79,3 +74,5 @@ if [ -f '/Users/senbei139/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/senbe
 
 # The next line enables shell command completion for gcloud.
 if [ -f '/Users/senbei139/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/senbei139/google-cloud-sdk/completion.zsh.inc'; fi
+
+. /usr/local/opt/asdf/libexec/asdf.sh

@@ -34,19 +34,6 @@ rev = '3787e5'
 [[plugins]]
 repo = 'wlangstroth/vim-racket'
 
-# メソッド・変数宣言一覧
-[[plugins]]
-repo = 'vim-scripts/taglist.vim'
-
-[[plugins]]
-repo = 'airblade/vim-gitgutter'
-hood_add = '''
-  set updatetime=500
-'''
-
-# Git operation
-[[plugins]]
-repo = 'tpope/vim-fugitive'
 
 [[plugins]]
 repo = 'Yggdroot/indentLine'
@@ -54,6 +41,15 @@ repo = 'Yggdroot/indentLine'
 [[plugins]]
 repo = 'editorconfig/editorconfig-vim'
 
+# Git operation
+[[plugins]]
+repo = 'tpope/vim-fugitive'
+
+[[plugins]]
+repo = 'airblade/vim-gitgutter'
+hood_add = '''
+  set updatetime=500
+'''
 
 # 依存関係を指定したいとき
 [[plugins]]
@@ -81,6 +77,6 @@ hook_add = '''
     \ <bang>0)
 '''
 
-############# docker #############
+############# color scheme #############
 [[plugins]]
-repo = 'skanehira/docker.vim'
+repo = 'jacoborus/tender.vim'

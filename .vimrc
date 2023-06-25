@@ -8,9 +8,22 @@ augroup PluginInstall
 augroup END
 
 " Required:
-set runtimepath+=$HOME/.cache/dein/repos/github.com/Shougo/dein.vim
+let $CACHE = expand('~/.cache')
+if !isdirectory($CACHE)
+  call mkdir($CACHE, 'p')
+endif
+if &runtimepath !~# '/dein.vim'
+  let s:dein_dir = fnamemodify('dein.vim', ':p')
+  if !isdirectory(s:dein_dir)
+    let s:dein_dir = $CACHE .. '/dein/repos/github.com/Shougo/dein.vim'
+    if !isdirectory(s:dein_dir)
+      execute '!git clone https://github.com/Shougo/dein.vim' s:dein_dir
+    endif
+  endif
+  execute 'set runtimepath^=' .. substitute(
+        \ fnamemodify(s:dein_dir, ':p') , '[/\\]$', '', '')
+endif
 
-" Required:
 if dein#load_state('$HOME/.cache/dein')
   call dein#begin('$HOME/.cache/dein')
 
@@ -38,9 +51,16 @@ let java_highlight_functions="style"
 let java_allow_cpp_keywords=1
 
 " color
-syntax on
+syntax enable
 set t_Co=256
 set background=dark
+
+"tender settings
+if (has("termguicolors"))
+  set termguicolors
+endif
+let g:cpp_class_scope_highlight = 1
+colorscheme tender
 
 autocmd ColorScheme * highlight Normal ctermbg=none
 autocmd ColorScheme * highlight LineNr ctermbg=none
@@ -95,6 +115,8 @@ set fileencodings=ucs-boms,utf-8,euc-jp,cp932,sjis " when read
 set fileformats=unix,dos,mac " new line
 set ambiwidth=double " prevent Garbled characters
 
+set cursorline
+
 if has("autocmd")
   " sw=shiftwidth, sts=softtabstop, ts=tabstop, et=expandtab
   autocmd FileType c           setlocal sw=4 sts=4 ts=4 et
@@ -114,8 +136,9 @@ if has("autocmd")
   autocmd FileType sass        setlocal sw=2 sts=2 ts=2 et
   autocmd FileType javascript  setlocal sw=2 sts=2 ts=2 et
   autocmd FileType typescript  setlocal sw=2 sts=2 ts=2 et
-  autocmd FileType go          setlocal sw=4 sts=4 ts=4
+  autocmd FileType go          setlocal sw=4 sts=4 ts=4 et
   autocmd FileType yaml        setlocal sw=2 sts=2 ts=2 et
+  autocmd FileType kotlin      setlocal sw=4 sts=4 ts=4 et
 endif
 
 let g:quickrun_config = get(g:, 'quickrun_config', {})
@@ -221,6 +244,7 @@ let g:netrw_sizestyle="H"
 let g:netrw_timefmt="%Y/%m/%d(%a) %H:%M:%S"
 let g:netrw_preview=1
 let g:netrw_winsize = 70
+let g:netrw_maxfilenamelen=70
 
 
 set diffopt=filler
