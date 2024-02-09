@@ -6,4 +6,8 @@ ln -sf ~/dotfiles/.zshrc ~/.zshrc
 ln -sf ~/dotfiles/.zprofile ~/.zprofile
 ln -sf ~/dotfiles/.tmux.conf ~/.tmux.conf
 ln -sf ~/dotfiles/.agignore ~/.agignore
-ln -sf ~/dotfiles/alacritty.yml  ~/.config/alacritty/alacritty.yml
+ln -sf ~/dotfiles/nvim/init.lua ~/.config/nvim/init.lua
+ln -sf ~/dotfiles/nvim/lua/*.lua ~/.config/nvim/lua/
+ln -sf ~/dotfiles/nvim/lua/plugins/*.lua ~/.config/nvim/lua/plugins/
+ln -sf ~/dotfiles/nvim/lazy-lock.json ~/.config/nvim/lazy-lock.json
+ln -sf ~/dotfiles/nvim/coc-settings.json ~/.config/nvim/coc-settings.json
