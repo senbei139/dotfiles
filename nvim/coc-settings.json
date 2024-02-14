@@ -44,5 +44,6 @@
     "typescriptreact"
   ],
   "clangd.path": "/opt/homebrew/opt/llvm/bin/clangd",
-  "python.jediEnabled": false
+  "python.jediEnabled": false,
+  "svelte.enable-ts-plugin": true
 }
