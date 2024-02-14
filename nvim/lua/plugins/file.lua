@@ -83,7 +83,7 @@ return {
           sort = {
             -- sort order can be "asc" or "desc"
             -- see :help oil-columns to see which columns are sortable
-            { "type", "asc" },
+            -- { "type", "asc" },
             { "name", "asc" },
           },
         },
