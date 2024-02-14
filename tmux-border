@@ -1,0 +1,35 @@
+#!/bin/zsh
+
+if git_status=$(cd $1 && git status 2>/dev/null ); then
+  git_branch="$(git branch --contains| awk 'NR==1 {print $2}')"
+
+  # release/master で作業しているか
+  if [[ $git_branch = "release" || $git_branch = "master" ]]; then
+    fg_git=$fg_red
+  else
+    fg_git=$fg_blue
+  fi
+
+  # git status コマンドの出力テキストからステータスを判定
+  case $git_status in
+    *Changes\ not\ staged* ) git_status="+" ;;
+    *Changes\ to\ be\ committed* ) git_status="++" ;; 
+    *currently\ editing\ a\ commit\ while\ rebasing* ) git_status="in progress(rebase)" ;;
+    *interactive\ rebase\ in\ progress* ) git_status="in progress(rebase)" ;;
+    *currently\ cherry-picking\ commit* ) git_status="in progress(cherry-pick)" ;;
+    * ) git_status="---" ;;
+  esac
+
+  if [[ $git_status == "---" ]]; then
+    fg_git_status=$fg_blue
+  else
+    fg_git_status=$fg_red
+  fi
+else
+  git_branch="---"
+  fg_git=$fg_blue
+  git_status="---"
+  fg_git_status=$fg_blue
+fi
+
+echo "$fg_git_status $git_status"

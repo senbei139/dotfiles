@@ -35,7 +35,7 @@ fpath=($(brew --prefix)/share/zsh/site-functions $fpath)
 autoload -Uz compinit && compinit
 
 setopt transient_rprompt
-PROMPT='%F{006}@%m%f %c $ '
+PROMPT='%F{006}%n@%*%f %c $ '
 
 alias glog='git log --graph --all --format="%x09%C(cyan bold)%an%Creset%x09%C(yellow)%h%Creset <%ad> %C(magenta reverse)%d%Creset %s" --date=format:"%Y/%m/%d %H:%M"'
 
@@ -45,8 +45,6 @@ export PATH="$PATH:$HOME/.fzf/bin"
 #export FZF_DEFAULT_COMMAND='rg --files --hidden --glob "!.git"'
 #export FZF_DEFAULT_OPTS="--height 50% --layout=reverse --border --inline-info --preview 'head -100 {}'"
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-alias vimf='vim `find "$1" -type f | fzf`'
-alias vimd='vim `find "$1" -type d | fzf`'
 
 fd() {
   local dir
