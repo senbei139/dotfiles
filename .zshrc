@@ -15,10 +15,12 @@ export PATH=$PATH:$ANDROID_SDK_ROOT/emulator
 export PATH=$PATH:$ANDROID_SDK_ROOT/platform-tools
 export SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
 
-# c
-export PATH="/usr/local/opt/llvm/bin:$PATH"
-export LDFLAGS="-L/usr/local/opt/llvm/lib"
-export CPPFLAGS="-I/usr/local/opt/llvm/include"
+
+function precmd() {
+  if [ ! -z $TMUX ]; then
+    tmux refresh-client -S
+  fi
+}
 
 # python
 export PYTHONIOENCODING=utf-8
@@ -35,7 +37,7 @@ fpath=($(brew --prefix)/share/zsh/site-functions $fpath)
 autoload -Uz compinit && compinit
 
 setopt transient_rprompt
-PROMPT='%F{006}%n@%*%f %c $ '
+PROMPT='%F{006}[%*] %#%f %c/ $ '
 
 alias glog='git log --graph --all --format="%x09%C(cyan bold)%an%Creset%x09%C(yellow)%h%Creset <%ad> %C(magenta reverse)%d%Creset %s" --date=format:"%Y/%m/%d %H:%M"'
 
