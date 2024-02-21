@@ -143,6 +143,8 @@ return {
           },
         },
       })
+
+      vim.api.nvim_set_keymap("n", "-", "<CMD>Oil<CR>", { noremap = true })
     end,
   }
 }

@@ -39,7 +39,6 @@ vim.o.nu = true
 -- set conceallevel=0
 -- let g:vim_json_syntax_concesal=0
 
-vim.o.diffopt = filler
 
 -- search
 vim.o.incsearch = true -- inclement search
@@ -51,7 +50,6 @@ vim.api.nvim_set_keymap('n', '<Esc><Esc>', ':nohl<CR>', { noremap = true, silent
 
 
 -- manipulation
-vim.g.mapleader = ' '
 vim.opt.clipboard:append{'unnamedplus'}
 vim.o.ttimeout = true
 vim.o.ttimeoutlen = 30
