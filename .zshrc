@@ -2,7 +2,7 @@ export PATH=/usr/local/bin:/usr/bin:/bin:/sbin:/usr/sbin:/usr/local/sbin:$HOME/w
 
 export LANG=ja_JP.UTF-8
 export TERM=xterm-256color
-KEYTIMEOUT=1
+export KEYTIMEOUT=1
 export HISTCONTROL=ignoredups
 setopt nonomatch
 export HISTSIZE=1000
@@ -72,9 +72,16 @@ alias la='ls -alFG'
 alias vim='nvim'
 
 # The next line updates PATH for the Google Cloud SDK.
-if [ -f '/Users/senbei139/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/senbei139/google-cloud-sdk/path.zsh.inc'; fi
+if [ -f '~/google-cloud-sdk/path.zsh.inc' ]; then . '~/google-cloud-sdk/path.zsh.inc'; fi
 
 # The next line enables shell command completion for gcloud.
-if [ -f '/Users/senbei139/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/senbei139/google-cloud-sdk/completion.zsh.inc'; fi
+if [ -f '~/google-cloud-sdk/completion.zsh.inc' ]; then . '~/google-cloud-sdk/completion.zsh.inc'; fi
 
-. /usr/local/opt/asdf/libexec/asdf.sh
+export PATH="$PATH:$HOME/.orbstack/bin"
+
+# bun completions
+[ -s "~/.bun/_bun" ] && source "~/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
