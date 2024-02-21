@@ -69,6 +69,8 @@ alias ls='ls -GF'
 alias ll='ls -lFG'
 alias la='ls -alFG'
 
+alias vim='nvim'
+
 # The next line updates PATH for the Google Cloud SDK.
 if [ -f '/Users/senbei139/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/senbei139/google-cloud-sdk/path.zsh.inc'; fi
 
