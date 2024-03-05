@@ -7,13 +7,9 @@ export HISTCONTROL=ignoredups
 setopt nonomatch
 export HISTSIZE=1000
 
-export PATH=$PATH:/Users/senbei139/Library/Android/sdk/platform-tools
-export JAVA_HOME=/Applications/Android\ Studio.app/Contents/jre/Contents/Home
+eval $(/opt/homebrew/bin/brew shellenv)
 
-export ANDROID_SDK_ROOT=$HOME/Library/Android/sdk
-export PATH=$PATH:$ANDROID_SDK_ROOT/emulator
-export PATH=$PATH:$ANDROID_SDK_ROOT/platform-tools
-export SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
+. /opt/homebrew/opt/asdf/libexec/asdf.sh
 
 
 function precmd() {
@@ -28,16 +24,15 @@ export PYTHONIOENCODING=utf-8
 export PATH=$PATH:./node_modules/.bin
 export NODE_PATH=`npm root -g`
 
-# golang
-export GOROOT=/usr/local/opt/go/libexec
-export PATH=$PATH:$GOROOT/bin
+# flutter
+export PATH=$HOME/flutter/bin:$PATH
 
 # git
 fpath=($(brew --prefix)/share/zsh/site-functions $fpath)
 autoload -Uz compinit && compinit
 
 setopt transient_rprompt
-PROMPT='%F{006}[%*] %#%f %c/ $ '
+PROMPT='%F{006}[%*] %#%f %c $ '
 
 alias glog='git log --graph --all --format="%x09%C(cyan bold)%an%Creset%x09%C(yellow)%h%Creset <%ad> %C(magenta reverse)%d%Creset %s" --date=format:"%Y/%m/%d %H:%M"'
 
