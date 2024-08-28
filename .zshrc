@@ -41,7 +41,7 @@ alias glog='git log --graph --all --format="%x09%C(cyan bold)%an%Creset%x09%C(ye
 export PATH="$PATH:$HOME/.fzf/bin"
 #export FZF_DEFAULT_COMMAND='rg --files --hidden --glob "!.git"'
 #export FZF_DEFAULT_OPTS="--height 50% --layout=reverse --border --inline-info --preview 'head -100 {}'"
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+source <(fzf --zsh)
 
 fd() {
   local dir

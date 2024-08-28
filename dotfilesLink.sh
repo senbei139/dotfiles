@@ -12,3 +12,4 @@ ln -sf ~/dotfiles/nvim/lua/plugins/*.lua ~/.config/nvim/lua/plugins/
 ln -sf ~/dotfiles/nvim/lazy-lock.json ~/.config/nvim/lazy-lock.json
 ln -sf ~/dotfiles/nvim/coc-settings.json ~/.config/nvim/coc-settings.json
 sudo ln -sf ~/dotfiles/tmux-border /usr/local/bin/tmux-border
+ln -sf ~/dotfiles/lazygit/config.yml ~/Library/Application\ Support/lazygit/config.yml
