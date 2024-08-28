@@ -3,7 +3,6 @@ vendor
 .vim/bundle
 .vim/dict
 .git
-lib
 libs
 jquery-*.js
 *.swp

@@ -1,0 +1,14 @@
+git:
+  paging:
+    colorArg: always
+gui:
+  language: 'en'
+  sidePanelWidth: 0.15
+  theme:
+    selectedLineBgColor:
+      - underline
+refresher:
+  refreshInterval: 3
+os:
+  editPreset: "nvim-remote"
+  editCommand: "nvim"
