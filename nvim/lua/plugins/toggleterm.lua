@@ -4,6 +4,7 @@ return {
     version = "*",
     opts = {
       size = 100,
+      open_mapping = [[<leader>t]],
       hide_numbers = true,
       shade_filetypes = {},
       shade_terminals = true,

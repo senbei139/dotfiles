@@ -67,6 +67,9 @@ alias la='ls -alFG'
 alias vim='nvim'
 alias lg='lazygit'
 
+# lazydocker
+alias lzd='lazydocker'
+
 # The next line updates PATH for the Google Cloud SDK.
 if [ -f '~/google-cloud-sdk/path.zsh.inc' ]; then . '~/google-cloud-sdk/path.zsh.inc'; fi
 

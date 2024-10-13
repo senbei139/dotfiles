@@ -209,17 +209,17 @@ let g:acp_enableAtStartup = 0
 
 
 " vim-lsp
-let g:lsp_signs_enabled = 1         " enable signs
-let g:lsp_diagnostics_echo_cursor = 1 " enable echo under cursor when in normal mode
-let g:lsp_diagnostics_enabled = 1
-let g:lsp_signs_error = {'text': 'E'}
-let g:lsp_signs_warning = {'text': 'W'}
-let g:lsp_async_completion = 1
-"let g:lsp_log_verbose = 1
-"let g:lsp_log_file = expand("~/vim-lsp.log")
-nnoremap <expr> <silent> <C-]> execute(':LspDefinition') =~ "not supported" ? "\<C-]>" : ":echo<CR>"
-" nnoremap <silent> :LspNextError<CR>
-" nnoremap <silent> :LspPreviousError<CR>
+" let g:lsp_signs_enabled = 1         " enable signs
+" let g:lsp_diagnostics_echo_cursor = 1 " enable echo under cursor when in normal mode
+" let g:lsp_diagnostics_enabled = 1
+" let g:lsp_signs_error = {'text': 'E'}
+" let g:lsp_signs_warning = {'text': 'W'}
+" let g:lsp_async_completion = 1
+" "let g:lsp_log_verbose = 1
+" "let g:lsp_log_file = expand("~/vim-lsp.log")
+" nnoremap <expr> <silent> <C-]> execute(':LspDefinition') =~ "not supported" ? "\<C-]>" : ":echo<CR>"
+" " nnoremap <silent> :LspNextError<CR>
+" " nnoremap <silent> :LspPreviousError<CR>
 
 
 command! Jq :%!jq '.'
