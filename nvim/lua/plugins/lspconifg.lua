@@ -1,15 +1,42 @@
 return {
   {
     "neovim/nvim-lspconfig",
+    dependencies = {
+      "hrsh7th/nvim-cmp",
+      "hrsh7th/cmp-nvim-lsp",
+    },
     event = { 'BufReadPost', 'BufNewFile' },
     config = function()
+      -- Loading nvim-cmp
+      local capabilities = require("cmp_nvim_lsp").default_capabilities()
       local lspconfig = require('lspconfig')
-      lspconfig.pyright.setup{}
-      lspconfig.ruff.setup{}
-      lspconfig.ts_ls.setup{}
+
+      lspconfig.pyright.setup{
+        capabilities = capabilities,
+      }
+      lspconfig.ruff.setup{
+        capabilities = capabilities,
+      }
+      lspconfig.ts_ls.setup{
+        capabilities = capabilities,
+      }
+      lspconfig.eslint.setup{
+        capabilities = capabilities,
+      }
+      lspconfig.biome.setup{
+        capabilities = capabilities,
+        cmd = { "npx", "biome", "lsp-proxy" }
+      }
+      lspconfig.svelte.setup{
+        capabilities = capabilities,
+      }
+
+      null_ls.setup({
+        sources = sources,
+      })
         
       vim.keymap.set('n', 'K',  '<cmd>lua vim.lsp.buf.hover()<CR>')
-      vim.keymap.set('n', 'gf', '<cmd>lua vim.lsp.buf.formatting()<CR>')
+      vim.keymap.set('n', 'gf', '<cmd>lua vim.lsp.buf.format()<CR>')
       vim.keymap.set('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>')
       vim.keymap.set('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>')
       vim.keymap.set('n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>')

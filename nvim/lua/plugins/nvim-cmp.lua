@@ -1,29 +1,28 @@
 return {
   {
     "hrsh7th/nvim-cmp",
-    version = false,
-    event = "InsertEnter",
-    dependencies = {
-      "hrsh7th/cmp-nvim-lsp",
-      -- "hrsh7th/cmp-buffer",
-      -- "hrsh7th/cmp-path",
-    },
-    config = function()
-      -- Loading nvim-cmp
-      local capabilities = require("cmp_nvim_lsp").default_capabilities()
-      local lspconfig = require('lspconfig')
+    --version = false,
+    -- event = "InsertEnter",
+    -- dependencies = {
+    --   "hrsh7th/nvim-cmp",
+    --   "hrsh7th/cmp-nvim-lsp",
+    -- },
+    -- config = function()
+    --   -- Loading nvim-cmp
+    --   local capabilities = require("cmp_nvim_lsp").default_capabilities()
+    --   local lspconfig = require('lspconfig')
 
-      local servers = {
-        "tsserver",
-      }
+    --   local servers = {
+    --     "tsserver",
+    --   }
 
-      for _, lsp in ipairs(servers) do
-        lspconfig[lsp].setup {
-          -- on_attach = my_custom_on_attach,
-          capabilities = capabilities,
-        }
-      end
-    end
+    --   for _, lsp in ipairs(servers) do
+    --     lspconfig[lsp].setup {
+    --       -- on_attach = my_custom_on_attach,
+    --       capabilities = capabilities,
+    --     }
+    --   end
+    -- end
     -- ```lua
     -- opts = {
     --   auto_brackets = { "python" }
