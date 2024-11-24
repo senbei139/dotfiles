@@ -11,6 +11,22 @@ return {
       local capabilities = require("cmp_nvim_lsp").default_capabilities()
       local lspconfig = require('lspconfig')
 
+      local use_biome = function()
+        return lspconfig.util.root_pattern('biome.json')(vim.fn.getcwd())
+      end
+
+      --eslint
+      local eslint_opts = {
+        capabilities = capabilities,
+        cmd = { "npx", "eslint", "." }
+      }
+
+      eslint_opts.on_attach = function(client)
+        if not use_biome() then
+          client.stop(true)
+        end
+      end
+
       lspconfig.pyright.setup{
         capabilities = capabilities,
       }
@@ -20,9 +36,7 @@ return {
       lspconfig.ts_ls.setup{
         capabilities = capabilities,
       }
-      lspconfig.eslint.setup{
-        capabilities = capabilities,
-      }
+      lspconfig.eslint.setup(eslint_opts)
       lspconfig.biome.setup{
         capabilities = capabilities,
         cmd = { "npx", "biome", "lsp-proxy" }
@@ -30,11 +44,13 @@ return {
       lspconfig.svelte.setup{
         capabilities = capabilities,
       }
+      lspconfig.dartls.setup{
+        capabilities = capabilities,
+      }
+      lspconfig.golsp.setup{
+        capabilities = capabilities,
+      }
 
-      null_ls.setup({
-        sources = sources,
-      })
-        
       vim.keymap.set('n', 'K',  '<cmd>lua vim.lsp.buf.hover()<CR>')
       vim.keymap.set('n', 'gf', '<cmd>lua vim.lsp.buf.format()<CR>')
       vim.keymap.set('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>')
