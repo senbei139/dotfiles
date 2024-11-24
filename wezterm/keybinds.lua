@@ -67,7 +67,7 @@ return {
     { key = '[', mods = 'LEADER', action = act.ActivateCopyMode },
     { key = 'c', mods = 'CMD', action = act.CopyTo 'Clipboard' },
     { key = 'v', mods = 'CMD', action = act.PasteFrom 'Clipboard' },
-    { key = 'p', mods = 'LEADER', action = act.PasteFrom 'Clipboard' },
+    { key = 'p', mods = 'SHIFT|CTRL', action = act.PasteFrom 'Clipboard' },
   },
 
   -- ----------------------------------------------------

@@ -10,8 +10,10 @@ config.automatically_reload_config = true
 
 -- For example, changing the color scheme:
 config.color_scheme = "OneDark (base16)"
-config.window_background_opacity = 0.93
-config.macos_window_background_blur = 20
+-- config.window_background_opacity = 0.93
+-- config.macos_window_background_blur = 20
+
+config.window_decorations = "RESIZE"
 
 -- font
 -- config.font = wezterm.font("Firge35Nerd Console")
@@ -36,21 +38,18 @@ config.window_padding = {
 }
 
 local DEFAULT_FG = { Color = '#9a9eab' }
-local DEFAULT_BG = { Color = '#333333' }
 
 local SPACE_1 = ' '
 local SPACE_3 = '   '
-local HEADER_HOST = { Foreground = { Color = '#75b1a9' }, Text = '' }
-local HEADER_CWD = { Foreground = { Color = '#92aac7' }, Text = '' }
+local HEADER_HOST = { Text = wezterm.nerdfonts.md_desktop_mac }
+local HEADER_CWD = { Text = wezterm.nerdfonts.oct_file_directory }
+local HEADER_GIT = { Text = wezterm.nerdfonts.cod_github_inverted }
+local HEADER_WORKSPACE = { Text = wezterm.nerdfonts.md_rocket_launch }
 
 local function AddElement(elems, header, str)
-  table.insert(elems, { Foreground = header.Foreground })
-  table.insert(elems, { Background = DEFAULT_BG })
   table.insert(elems, { Text = header.Text .. SPACE_1 })
 
   table.insert(elems, { Foreground = DEFAULT_FG })
-  table.insert(elems, { Background = DEFAULT_BG })
-  table.insert(elems, { Attribute = {font_size = 19} })
   table.insert(elems, { Text = str .. SPACE_3 })
 end
 
@@ -58,26 +57,31 @@ local function GetGitBranch(elems, file_path)
   local handle = io.popen("git -C " .. file_path .. " rev-parse --abbrev-ref HEAD 2> /dev/null")
   local branch = handle:read("*a")
   handle:close()
-  AddElement(elems, HEADER_CWD, branch)
+  if not branch then
+    return
+  end
+  AddElement(elems, HEADER_WORKSPACE, wezterm.mux.get_active_workspace())
+  AddElement(elems, HEADER_GIT, branch)
 end
 
 local function GetHostAndCwd(elems, pane, file_path)
-  local username = os.getenv('USER') or os.getenv('LOGNAME') or os.getenv('USERNAME')
-  AddElement(elems, HEADER_HOST, wezterm.hostname())
   AddElement(elems, HEADER_CWD, file_path)
-end
-
-local function RightUpdate(window, pane)
+  AddElement(elems, HEADER_HOST, wezterm.hostname())
 end
 
 wezterm.on('update-status', function(window, pane)
-  local elems = {}
+  local right_elems = {}
+  local left_elems = {}
 
   local uri = pane:get_current_working_dir()
-  GetHostAndCwd(elems, pane, uri.file_path)
-  GetGitBranch(elems, uri.file_path)
+  if not uri then
+    return
+  end
+  GetHostAndCwd(right_elems, pane, uri.file_path)
+  GetGitBranch(left_elems, uri.file_path)
 
-  window:set_right_status(wezterm.format(elems))
+  window:set_right_status(wezterm.format(right_elems))
+  window:set_left_status(wezterm.format(left_elems))
 end)
 
 -- ----------------------------------------------------
@@ -87,7 +91,7 @@ config.tab_bar_at_bottom = true
 config.show_tabs_in_tab_bar = false
 config.show_new_tab_button_in_tab_bar = false
 config.window_frame = {
-  font_size = 13.0,
+  font_size = 14.5,
 }
 
 ----------------------------------------------------
