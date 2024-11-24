@@ -42,13 +42,12 @@ local DEFAULT_FG = { Color = '#9a9eab' }
 local SPACE_1 = ' '
 local SPACE_3 = '   '
 local HEADER_HOST = { Text = wezterm.nerdfonts.md_desktop_mac }
-local HEADER_CWD = { Text = wezterm.nerdfonts.md_file_directory }
+local HEADER_CWD = { Text = wezterm.nerdfonts.oct_file_directory }
 local HEADER_GIT = { Text = wezterm.nerdfonts.md_source_branch }
 local HEADER_WORKSPACE = { Text = wezterm.nerdfonts.md_rocket_launch }
 
 local function AddElement(elems, header, str)
   table.insert(elems, { Text = header.Text .. SPACE_1 })
-
   table.insert(elems, { Foreground = DEFAULT_FG })
   table.insert(elems, { Text = str .. SPACE_3 })
 end
@@ -60,13 +59,7 @@ local function GetGitBranch(elems, file_path)
   if not branch then
     return
   end
-  AddElement(elems, HEADER_WORKSPACE, wezterm.mux.get_active_workspace())
   AddElement(elems, HEADER_GIT, branch)
-end
-
-local function GetHostAndCwd(elems, pane, file_path)
-  AddElement(elems, HEADER_CWD, file_path)
-  AddElement(elems, HEADER_HOST, wezterm.hostname())
 end
 
 wezterm.on('update-status', function(window, pane)
@@ -77,7 +70,11 @@ wezterm.on('update-status', function(window, pane)
   if not uri then
     return
   end
-  GetHostAndCwd(right_elems, pane, uri.file_path)
+
+  AddElement(right_elems, HEADER_HOST, wezterm.hostname())
+  AddElement(right_elems, HEADER_CWD, uri.file_path)
+
+  AddElement(left_elems, HEADER_WORKSPACE, wezterm.mux.get_active_workspace())
   GetGitBranch(left_elems, uri.file_path)
 
   window:set_right_status(wezterm.format(right_elems))
