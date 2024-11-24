@@ -42,8 +42,8 @@ local DEFAULT_FG = { Color = '#9a9eab' }
 local SPACE_1 = ' '
 local SPACE_3 = '   '
 local HEADER_HOST = { Text = wezterm.nerdfonts.md_desktop_mac }
-local HEADER_CWD = { Text = wezterm.nerdfonts.oct_file_directory }
-local HEADER_GIT = { Text = wezterm.nerdfonts.cod_github_inverted }
+local HEADER_CWD = { Text = wezterm.nerdfonts.md_file_directory }
+local HEADER_GIT = { Text = wezterm.nerdfonts.md_source_branch }
 local HEADER_WORKSPACE = { Text = wezterm.nerdfonts.md_rocket_launch }
 
 local function AddElement(elems, header, str)
