@@ -13,11 +13,11 @@ config.color_scheme = "OneDark (base16)"
 -- config.window_background_opacity = 0.93
 -- config.macos_window_background_blur = 20
 
-config.window_decorations = "RESIZE"
+-- config.window_decorations = "RESIZE"
 
 -- font
 -- config.font = wezterm.font("Firge35Nerd Console")
-config.font_size = 14.5
+config.font_size = 14.0
 config.use_ime = true
 
 -- bell
@@ -31,8 +31,8 @@ config.exit_behavior = 'CloseOnCleanExit'
 
 
 config.window_padding = {
- left = 0,
- right = 0,
+ left = 3,
+ right = 3,
  top = 0,
  bottom = 0 
 }
@@ -88,7 +88,7 @@ config.tab_bar_at_bottom = true
 config.show_tabs_in_tab_bar = false
 config.show_new_tab_button_in_tab_bar = false
 config.window_frame = {
-  font_size = 14.5,
+  font_size = 13.5,
 }
 
 ----------------------------------------------------
