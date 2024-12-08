@@ -1,9 +1,12 @@
 git:
+  allBranchesLogCmd: git log --graph --color=always --date=format:'%Y-%m-%d %H:%M' --pretty=format:'%C(#a0a0a0 reverse)%h%Creset %C(cyan)<%ad>%Creset %C(#dd4814)%an%Creset %C(yellow reverse)%d%Creset %C(white bold)%s%Creset' --
+  branchLogCmd: git log --graph --color=always --date=format:'%Y-%m-%d %H:%M' --pretty=format:'%C(#a0a0a0 reverse)%h%Creset %C(cyan)<%ad>%Creset %C(#dd4814)%an%Creset %C(yellow reverse)%d%Creset %C(white bold)%s%Creset' {{branchName}} --
   paging:
     colorArg: always
 gui:
   language: 'en'
   sidePanelWidth: 0.15
+  nerdFontsVersion: "3"
   theme:
     selectedLineBgColor:
       - underline
