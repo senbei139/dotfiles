@@ -6,7 +6,7 @@ return {
     -- Workspace
     { 
       key = 'w',
-      mods = 'CTRL', 
+      mods = 'LEADER',
       action = wezterm.action_callback (function (win, pane)
         local workspaces = {}
         for i, name in ipairs(wezterm.mux.get_workspace_names()) do
