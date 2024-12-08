@@ -66,12 +66,8 @@ vim.opt.undofile = true
 vim.opt.undodir = vim.fn.expand('~/.vim/undo')
 
 
-vim.api.nvim_set_keymap('n', 'j', 'gj', { noremap = true })
-vim.api.nvim_set_keymap('n', 'k', 'gk', { noremap = true })
 vim.api.nvim_set_keymap('n', '<Down>', 'gj', { noremap = true })
 vim.api.nvim_set_keymap('n', '<Up>', 'gk', { noremap = true })
-vim.api.nvim_set_keymap('n', 'gj', 'j', { noremap = true })
-vim.api.nvim_set_keymap('n', 'gk', 'k', { noremap = true })
 
 
 vim.o.ttimeoutlen = 10
