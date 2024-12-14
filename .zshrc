@@ -36,6 +36,7 @@ PROMPT='%F{006}[%*] %#%f %c $ '
 
 alias glog='git log --graph --all --format="%x09%C(cyan bold)%an%Creset%x09%C(yellow)%h%Creset <%ad> %C(magenta reverse)%d%Creset %s" --date=format:"%Y/%m/%d %H:%M"'
 
+source $(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
 # fzf
 export PATH="$PATH:$HOME/.fzf/bin"
