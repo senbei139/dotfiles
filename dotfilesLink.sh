@@ -6,6 +6,7 @@ ln -sf ~/dotfiles/.zshrc ~/.zshrc
 ln -sf ~/dotfiles/.zprofile ~/.zprofile
 ln -sf ~/dotfiles/.tmux.conf ~/.tmux.conf
 ln -sf ~/dotfiles/.agignore ~/.agignore
+ln -sf ~/dotfiles/.gitconfig ~/.gitconfig
 ln -sf ~/dotfiles/nvim/init.lua ~/.config/nvim/init.lua
 ln -sf ~/dotfiles/nvim/lua/*.lua ~/.config/nvim/lua/
 ln -sf ~/dotfiles/nvim/lua/plugins/*.lua ~/.config/nvim/lua/plugins/

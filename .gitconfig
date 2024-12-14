@@ -1,0 +1,11 @@
+[user]
+	email = senbei139@gmail.com
+	name = senbei139
+[core]
+	excludesfile = /Users/senbei139/.gitignore_global
+[init]
+	defaultBranch = main
+[url "ssh://git@github.com/"]
+    insteadOf = https://github.com/
+[alias]
+  co = !git branch -a | fzf | xargs git checkout
