@@ -21,7 +21,6 @@ vim.o.splitbelow = true
 
 -- color
 vim.opt.syntax = 'on'
-vim.o.t_Co = 256
 vim.o.background = dark
 
 
@@ -57,7 +56,6 @@ vim.o.ttimeout = true
 vim.o.ttimeoutlen = 30
 
 -- undo
-vim.o.persistent_undo = true
 vim.opt.directory = vim.fn.expand('~/.vim/swp')
 vim.opt.backup = false
 vim.opt.writebackup = false
