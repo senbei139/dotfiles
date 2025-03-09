@@ -3,6 +3,8 @@ require("color")
 require("indent")
 require("toggleterm")
 require("linter")
+require("spell")
+require("terminal")
 
 vim.api.nvim_exec('language en_US', true)
 vim.api.nvim_exec('lang en_US.UTF-8', true)

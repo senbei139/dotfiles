@@ -33,12 +33,6 @@ local spec = {
             end)
             return "<Ignore>"
           end, { expr = true })
-          -- Actions
-          map({ "n", "v" }, "<Space>gs", ":Gitsigns stage_hunk<CR>")
-          map({ "n", "v" }, "<Space>gu", ":Gitsigns undo_stage_hunk<CR>")
-          map({ "n", "v" }, "<Space>gr", ":Gitsigns reset_hunk<CR>")
-          -- Text object
-          map({ "o", "x" }, "ig", ":<C-U>Gitsigns select_hunk<CR>")
         end,
       })
     end
