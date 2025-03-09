@@ -31,6 +31,17 @@ return {
         }, pane)
       end),
     },
+    {
+      key = 'r',
+      mods = 'LEADER',
+      action = act.PromptInputLine {
+        description = 'Rename workspace to',
+        action = wezterm.action_callback(function(_, _, line)
+          local current = wezterm.mux.get_active_workspace()
+          wezterm.mux.rename_workspace(current, line)
+        end),
+      },
+    },
     { key = 'c', mods = 'LEADER', action = act.SwitchToWorkspace { } },
     { key = 'n', mods = 'LEADER', action = act.SwitchWorkspaceRelative(1) },
     { key = 'p', mods = 'LEADER', action = act.SwitchWorkspaceRelative(-1) },
