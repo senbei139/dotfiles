@@ -27,12 +27,16 @@ export NODE_PATH=`npm root -g`
 # flutter
 export PATH=$HOME/flutter/bin:$PATH
 
+# go
+export GOPATH=$(go env GOPATH)
+export PATH=$PATH:$GOPATH/bin
+#
 # git
 fpath=($(brew --prefix)/share/zsh/site-functions $fpath)
 autoload -Uz compinit && compinit
 
 setopt transient_rprompt
-PROMPT='%F{006}[%*] %#%f %c $ '
+PROMPT='%F{006}[%*] %n%f $ '
 
 alias glog='git log --graph --all --format="%x09%C(cyan bold)%an%Creset%x09%C(yellow)%h%Creset <%ad> %C(magenta reverse)%d%Creset %s" --date=format:"%Y/%m/%d %H:%M"'
 
