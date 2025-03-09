@@ -29,9 +29,9 @@ config.scrollback_lines = 100000
 -- exit
 config.exit_behavior = 'CloseOnCleanExit'
 
-+-- cursor
-+config.default_cursor_style = 'BlinkingBlock'
-+config.cursor_blink_rate = 700
+-- cursor
+config.default_cursor_style = 'BlinkingBlock'
+config.cursor_blink_rate = 700
 
 config.window_padding = {
  left = 3,
