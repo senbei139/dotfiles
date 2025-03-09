@@ -5,7 +5,7 @@ return {
     lazy = false,
     version = false,
     opts = {
-      provider = "copilot",
+      provider = "copilot", --"claude" | "openai" | "azure" | "gemini" | "cohere" | "copilot"
       auto_suggestions_provider = "copilot",
 
       -- 動作設定
@@ -24,6 +24,11 @@ return {
         wrap = true,        -- テキストの折り返し
         width = 30,         -- サイドバーの幅
         -- その他の詳細設定は省略
+      },
+      copilot = {
+        model = "gpt-4o-2024-05-13",
+        -- model = "gpt-4o-mini",
+        max_tokens = 4096,
       },
     },
     build = "make",
