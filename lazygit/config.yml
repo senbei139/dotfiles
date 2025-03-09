@@ -3,6 +3,14 @@ git:
   branchLogCmd: git log --graph --color=always --date=format:'%Y-%m-%d %H:%M' --pretty=format:'%C(#a0a0a0 reverse)%h%Creset %C(cyan)<%ad>%Creset %C(#dd4814)%an%Creset %C(yellow reverse)%d%Creset %C(white bold)%s%Creset' {{branchName}} --
   paging:
     colorArg: always
+    pager: delta --dark --paging=never
+
+customCommands:
+  - command: git cz
+    context: files
+    subprocess: true
+    key: C
+
 gui:
   language: 'en'
   sidePanelWidth: 0.15
@@ -10,8 +18,10 @@ gui:
   theme:
     selectedLineBgColor:
       - underline
+
 refresher:
   refreshInterval: 3
+
 os:
   editPreset: "nvim-remote"
   editCommand: "nvim"

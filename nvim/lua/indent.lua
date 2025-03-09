@@ -81,7 +81,7 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = "go",
-	command = "setlocal sw=4 sts=4 ts=4 et"
+	command = "setlocal sw=4 sts=4 ts=4 noexpandtab"
 })
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = "yaml",
