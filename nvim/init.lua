@@ -76,8 +76,6 @@ vim.o.cmdwinheight = 20
 vim.o.hidden = true
 vim.api.nvim_set_keymap('n', '<C-p>', ':bprevious<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<C-n>', ':bnext<CR>',  { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<leader>f', ':Files<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<leader>b', ':Buffers<CR>', { noremap = true, silent = true })
 
 
 
