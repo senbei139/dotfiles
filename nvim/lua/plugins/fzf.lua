@@ -105,6 +105,7 @@ return {
       { "<leader>fg", "<cmd>FzfLua git_files<cr>", desc = "Find Files (git-files)" },
       { "<leader>fr", "<cmd>FzfLua oldfiles<cr>", desc = "Recent" },
       -- search
+      { "<leader>g", "<cmd>FzfLua live_grep<cr>", desc = "Buffer" },
       { "<leader>sa", "<cmd>FzfLua autocmds<cr>", desc = "Auto Commands" },
       { "<leader>sb", "<cmd>FzfLua grep_curbuf<cr>", desc = "Buffer" },
       { "<leader>sc", "<cmd>FzfLua command_history<cr>", desc = "Command History" },
