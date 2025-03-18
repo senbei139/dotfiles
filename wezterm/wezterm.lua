@@ -30,7 +30,6 @@ config.scrollback_lines = 100000
 config.exit_behavior = 'CloseOnCleanExit'
 
 -- cursor
-config.default_cursor_style = 'BlinkingBlock'
 config.cursor_blink_rate = 480
 config.cursor_blink_ease_in = 'Constant'
 config.cursor_blink_ease_out = 'Constant'
