@@ -91,6 +91,13 @@ vim.o.guicursor = 'n-v-c-sm-i-ci-ve:block,r-cr-o:hor20,a:blinkwait700-blinkoff40
 -- vim.o.ambiwidth = 'double'
 
 
+vim.api.nvim_create_autocmd("BufWritePre", {
+  pattern = "*",
+  callback = function()
+    vim.cmd([[%s/\s\+$//e]])
+  end,
+})
+
 -- complement command
 vim.o.wildmenu = true
 vim.o.wildmode = 'list:longest,full'
