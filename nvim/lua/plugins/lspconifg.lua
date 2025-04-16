@@ -30,15 +30,6 @@ return {
       lspconfig.ruff.setup{
         capabilities = capabilities,
       }
-      lspconfig.ruff_lsp.setup {
-        capabilities = capabilities,
-        on_attach = on_attach,
-        init_options = {
-            settings = {
-                args = {},
-            }
-        }
-      }
       lspconfig.pyright.setup {
         capabilities = capabilities,
         settings = {
