@@ -12,7 +12,7 @@ return {
     -- See Commands section for default commands if you want to lazy load on them
     config = function()
       require("CopilotChat").setup({
-        show_help = "yes",
+        show_help = true,
         prompts = {
           Explain = {
             prompt = "/COPILOT_EXPLAIN コードを日本語で説明してください",
@@ -66,6 +66,18 @@ return {
               return require('CopilotChat.select').gitdiff(source, true)
             end,
           },
+        },
+        window = {
+          layout = 'vertical',
+          width = 0.4,
+          height = 0.3,
+          relative = 'editor',
+          border = 'single',
+          row = 0,
+          col = 0,
+          title = 'Copilot Chat',
+          footer = nil,
+          zindex = 1,
         },
       })
     end,
