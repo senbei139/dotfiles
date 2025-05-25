@@ -8,17 +8,17 @@ return {
       local actions = fzf.actions
 
       -- Quickfix
-      config.defaults.keymap.fzf["ctrl-q"] = "select-all+accept"
-      config.defaults.keymap.fzf["ctrl-u"] = "half-page-up"
-      config.defaults.keymap.fzf["ctrl-d"] = "half-page-down"
-      config.defaults.keymap.fzf["ctrl-x"] = "jump"
-      config.defaults.keymap.fzf["ctrl-f"] = "preview-page-down"
-      config.defaults.keymap.fzf["ctrl-b"] = "preview-page-up"
-      config.defaults.keymap.builtin["<c-f>"] = "preview-page-down"
-      config.defaults.keymap.builtin["<c-b>"] = "preview-page-up"
+      -- config.defaults.keymap.fzf["ctrl-q"] = "select-all+accept"
+      -- config.defaults.keymap.fzf["ctrl-u"] = "half-page-up"
+      -- config.defaults.keymap.fzf["ctrl-d"] = "half-page-down"
+      -- config.defaults.keymap.fzf["ctrl-x"] = "jump"
+      -- config.defaults.keymap.fzf["ctrl-f"] = "preview-page-down"
+      -- config.defaults.keymap.fzf["ctrl-b"] = "preview-page-up"
+      -- config.defaults.keymap.builtin["<c-f>"] = "preview-page-down"
+      -- config.defaults.keymap.builtin["<c-b>"] = "preview-page-up"
 
-      config.defaults.actions.files["alt-c"] = config.defaults.actions.files["ctrl-r"]
-      config.set_action_helpstr(config.defaults.actions.files["ctrl-r"], "toggle-root-dir")
+      -- config.defaults.actions.files["alt-c"] = config.defaults.actions.files["ctrl-r"]
+      -- config.set_action_helpstr(config.defaults.actions.files["ctrl-r"], "toggle-root-dir")
 
       local img_previewer ---@type string[]?
       for _, v in ipairs({
