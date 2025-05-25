@@ -2,7 +2,6 @@ require("lazy_nvim")
 require("color")
 require("indent")
 require("toggleterm")
-require("github_copilot")
 require("spell")
 
 vim.api.nvim_exec('language en_US', true)
