@@ -21,8 +21,8 @@ function precmd() {
 # python
 export PYTHONIOENCODING=utf-8
 
-export PATH=$PATH:./node_modules/.bin
-export NODE_PATH=`npm root -g`
+# node
+export PATH=$PATH:`npm prefix --location=global`/bin
 
 # flutter
 export PATH=$HOME/flutter/bin:$PATH
