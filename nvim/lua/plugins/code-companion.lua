@@ -6,12 +6,7 @@ return {
     "ravitemer/mcphub.nvim"
   },
   opts = function(_, opts)
-    local base_opts = {}
-    -- default -> 環境に依存しない設定 -> 環境に依存する設定 の順にマージ
-    return vim.tbl_deep_extend("force", opts, base_opts, require("envs.code-companion").opts)
-  end,
-  config = function()
-    require("codecompanion").setup({
+    local base_opts = {
       strategies = {
         chat = {
           adapter = "anthropic",
@@ -19,6 +14,35 @@ return {
         inline = {
           adapter = "anthropic",
         },
+        -- agent = {
+        --   adapter = "openai",
+        -- },
+      },
+      adapters = {
+        anthropic = function()
+          return require("codecompanion.adapters").extend("anthropic", {
+            env = {
+              api_key = "cmd:gpg --decrypt ~/.gpg/.anthropic-api-key.gpg 2>/dev/null",
+            },
+            schema = {
+              model = {
+                default = "claude-3.7-sonnet",
+              },
+            },
+          })
+        end,
+        copilot = function()
+          return require("codecompanion.adapters").extend("copilot", {
+            schema = {
+              model = {
+                default = "claude-3.7-sonnet",
+              },
+            },
+          })
+        end,
+      },
+      opts = {
+        language = "Japanese"
       },
       extensions = {
         mcphub = {
@@ -29,6 +53,11 @@ return {
             make_slash_commands = true,  -- Add prompts as /slash commands
           }
         }
+      },
+      display = {
+        chat = {
+          auto_scroll = false
+        },
       },
       prompt_library = {
         ["CopilotExplain"] = {
@@ -150,12 +179,14 @@ return {
         --   },
         -- }
       }
-    })
+    }
+    -- default -> 環境に依存しない設定 -> 環境に依存する設定 の順にマージ
+    return vim.tbl_deep_extend("force", opts, base_opts, require("envs.code-companion").opts)
   end,
   keys = {
     {
       "<Space>cc",
-      ":CodeCompanionChat<CR>",
+      ":CodeCompanionChat Toggle<CR>",
       silent = true,
     },
   },
