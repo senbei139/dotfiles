@@ -6,13 +6,7 @@ return {
     },
     build = "npm install -g mcp-hub@latest",
     config= function()
-      require("mcphub").setup({
-        extensions = {
-          avante = {
-            make_slash_commands = true, -- スラッシュコマンドを生成する
-          }
-        }
-      })
+      require("mcphub").setup()
     end,
   }
 }
