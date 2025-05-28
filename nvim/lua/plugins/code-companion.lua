@@ -189,5 +189,10 @@ return {
       ":CodeCompanionChat Toggle<CR>",
       silent = true,
     },
+    {
+      "<Space>ca",
+      ":CodeCompanionAction<CR>",
+      silent = true,
+    },
   },
 }
