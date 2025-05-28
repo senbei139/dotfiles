@@ -20,6 +20,20 @@ return {
       -- config.defaults.actions.files["alt-c"] = config.defaults.actions.files["ctrl-r"]
       -- config.set_action_helpstr(config.defaults.actions.files["ctrl-r"], "toggle-root-dir")
 
+      -- Trouble
+      -- if LazyVim.has("trouble.nvim") then
+      --   config.defaults.actions.files["ctrl-t"] = require("trouble.sources.fzf").actions.open
+      -- end
+
+      -- Toggle root dir / cwd
+      config.defaults.actions.files["ctrl-r"] = function(_, ctx)
+        local o = vim.deepcopy(ctx.__call_opts)
+        o.root = o.root == false
+        o.cwd = nil
+        o.buf = ctx.__CTX.bufnr
+        LazyVim.pick.open(ctx.__INFO.cmd, o)
+      end
+
       local img_previewer ---@type string[]?
       for _, v in ipairs({
         { cmd = "ueberzug", args = {} },
