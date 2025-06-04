@@ -94,7 +94,7 @@ return {
           prompts = {
             {
               role = "system",
-              content = "You are an experienced developer with Lua and Neovim",
+              content = "あなたは優秀なエンジニアです。",
             },
             {
               role = "user",
@@ -108,7 +108,7 @@ return {
           prompts = {
             {
               role = "system",
-              content = "You are an experienced developer with Lua and Neovim",
+              content = "あなたは優秀なエンジニアです。",
             },
             {
               role = "user",
@@ -122,7 +122,7 @@ return {
           prompts = {
             {
               role = "system",
-              content = "You are an experienced developer with Lua and Neovim",
+              content = "あなたは優秀なエンジニアです。",
             },
             {
               role = "user",
@@ -136,7 +136,7 @@ return {
           prompts = {
             {
               role = "system",
-              content = "You are an experienced developer with Lua and Neovim",
+              content = "あなたは優秀なエンジニアです。",
             },
             {
               role = "user",
@@ -150,7 +150,7 @@ return {
           prompts = {
             {
               role = "system",
-              content = "You are an experienced developer with Lua and Neovim",
+              content = "あなたは優秀なエンジニアです。",
             },
             {
               role = "user",
@@ -168,16 +168,16 @@ return {
         --     }
         --   },
         -- }
-        -- ["CopilotCommitStaged"] = {
-        --   strategy = "inline",
-        --   description = "ステージ済みのコミットメッセージの作成をお願いする",
-        --   prompts = {
-        --     {
-        --       role = "user",
-        --       content = "ステージ済みの変更に対するコミットメッセージを日本語で記述してください"
-        --     }
-        --   },
-        -- }
+        ["CopilotCommitStaged"] = {
+          strategy = "inline",
+          description = "ステージ済みのコミットメッセージの作成をお願いする",
+          prompts = {
+            {
+              role = "user",
+              content = "ステージ済みの変更に対するコミットメッセージを日本語で記述してください"
+            }
+          },
+        }
       }
     }
     -- default -> 環境に依存しない設定 -> 環境に依存する設定 の順にマージ
