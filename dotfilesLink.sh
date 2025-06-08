@@ -14,3 +14,4 @@ ln -sf ~/dotfiles/nvim/lazy-lock.json ~/.config/nvim/lazy-lock.json
 sudo ln -sf ~/dotfiles/tmux-border /usr/local/bin/tmux-border
 ln -sf ~/dotfiles/lazygit/config.yml ~/.config/lazygit/config.yml
 ln -sf ~/dotfiles/wezterm/*.lua ~/.config/wezterm/
+ln -sf ~/dotfiles/.claude/CLAUDE.md ~/.claude/CLAUDE.md

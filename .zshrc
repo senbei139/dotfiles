@@ -92,3 +92,5 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
+# claude
+alias claude="/Users/senbei139/.claude/local/claude"
