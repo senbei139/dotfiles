@@ -92,5 +92,9 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
+# nb
+alias memo='nb e memo.md'
+alias todo='nb e todo.md'
+
 # claude
 alias claude="/Users/senbei139/.claude/local/claude"
