@@ -38,7 +38,7 @@ config.window_padding = {
  left = 3,
  right = 3,
  top = 0,
- bottom = 0 
+ bottom = 0
 }
 
 local DEFAULT_FG = { Color = '#9a9eab' }
@@ -98,9 +98,12 @@ config.window_frame = {
 ----------------------------------------------------
 -- keybinds
 ----------------------------------------------------
-config.leader = { key = " ", mods = "CTRL", timeout_milliseconds = 2000 }
-config.disable_default_key_bindings = true
-config.keys = require("keybinds").keys
-config.key_tables = require("keybinds").key_tables
+-- config.leader = { key = " ", mods = "CTRL", timeout_milliseconds = 2000 }
+-- config.disable_default_key_bindings = true
+-- config.keys = require("keybinds").keys
+-- config.key_tables = require("keybinds").key_tables
+
+-- tmuxを使うのでタブ機能やバーは無効化
+config.hide_tab_bar_if_only_one_tab = true
 
 return config
