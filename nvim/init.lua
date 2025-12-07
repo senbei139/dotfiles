@@ -1,5 +1,5 @@
-require("lazy_nvim")
 require("color")
+require("lazy_nvim")
 require("indent")
 require("toggleterm")
 require("spell")
@@ -17,12 +17,6 @@ vim.scriptencoding = 'utf-8'
 -- window
 vim.o.splitright = true
 vim.o.splitbelow = true
-
-
--- color
-vim.opt.syntax = 'on'
-vim.opt.termguicolors = true
-vim.o.background = dark
 
 
 -- visual

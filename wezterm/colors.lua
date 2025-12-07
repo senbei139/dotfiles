@@ -6,13 +6,12 @@ return {
 
   cursor_bg = "#E8EAED",
   cursor_fg = "#0d1117",
-  cursor_border = "#58a6ff",
+  cursor_border = "#E8EAED",
 
   selection_fg = "#ffffff",
-  selection_bg = "#30363d",
+  selection_bg = "#EA4335",
 
   -- scrollbar_thumb = "#484f58",
-  -- The color of the split lines between panes
   split = "#fcfcfc",
 
   ansi = {

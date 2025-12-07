@@ -24,10 +24,10 @@ config.initial_rows = 38
 config.initial_cols = 113
 
 config.window_padding = {
- left = 3,
- right = 3,
- top = 0,
- bottom = 0
+  left = 3,
+  right = 3,
+  top = 0,
+  bottom = 0
 }
 
 -- font
