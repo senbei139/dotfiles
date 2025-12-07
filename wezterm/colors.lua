@@ -11,7 +11,6 @@ return {
   selection_fg = "#ffffff",
   selection_bg = "#EA4335",
 
-  -- scrollbar_thumb = "#484f58",
   split = "#fcfcfc",
 
   ansi = {

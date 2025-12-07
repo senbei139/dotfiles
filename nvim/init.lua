@@ -27,8 +27,9 @@ vim.o.matchtime = 1
 
 vim.o.title = true
 
+vim.o.cmdheight = 0
 
--- set laststatus=2
+vim.o.laststatus = 0
 vim.o.statusline = "%y"
 vim.o.ruler = true
 vim.o.nu = true
@@ -48,7 +49,7 @@ vim.api.nvim_set_keymap('n', '<Esc><Esc>', ':nohl<CR>', { noremap = true, silent
 -- manipulation
 vim.opt.clipboard:append{'unnamedplus'}
 vim.o.ttimeout = true
-vim.o.ttimeoutlen = 30
+vim.o.ttimeoutlen = 10
 
 -- undo
 vim.opt.directory = vim.fn.expand('~/.vim/swp')
@@ -61,10 +62,6 @@ vim.opt.undodir = vim.fn.expand('~/.vim/undo')
 
 vim.api.nvim_set_keymap('n', '<Down>', 'gj', { noremap = true })
 vim.api.nvim_set_keymap('n', '<Up>', 'gk', { noremap = true })
-
-
-vim.o.ttimeoutlen = 10
-vim.o.cmdwinheight = 20
 
 
 -- Buffers
