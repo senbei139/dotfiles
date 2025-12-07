@@ -21,6 +21,7 @@ vim.o.splitbelow = true
 
 -- color
 vim.opt.syntax = 'on'
+vim.opt.termguicolors = true
 vim.o.background = dark
 
 
