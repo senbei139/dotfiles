@@ -8,12 +8,27 @@ local config = wezterm.config_builder()
 
 config.automatically_reload_config = true
 
--- For example, changing the color scheme:
-config.color_scheme = "OneDark (base16)"
--- config.window_background_opacity = 0.93
+-- Color Scheme
+config.colors = require("colors")
+-- config.color_scheme = 'Google Dark (base16)'
+-- config.color_scheme = 'Spacemacs (base16)'
+
 -- config.macos_window_background_blur = 20
 
 -- config.window_decorations = "RESIZE"
+--
+-- window size
+config.adjust_window_size_when_changing_font_size = false
+config.native_macos_fullscreen_mode = true
+config.initial_rows = 38
+config.initial_cols = 113
+
+config.window_padding = {
+ left = 3,
+ right = 3,
+ top = 0,
+ bottom = 0
+}
 
 -- font
 -- config.font = wezterm.font("Firge35Nerd Console")
@@ -34,12 +49,10 @@ config.cursor_blink_rate = 480
 config.cursor_blink_ease_in = 'Constant'
 config.cursor_blink_ease_out = 'Constant'
 
-config.window_padding = {
- left = 3,
- right = 3,
- top = 0,
- bottom = 0
-}
+
+-- ----------------------------------------------------
+-- -- Session
+-- ----------------------------------------------------
 
 local DEFAULT_FG = { Color = '#9a9eab' }
 
@@ -95,15 +108,19 @@ config.window_frame = {
   font_size = 13.5,
 }
 
+-- ----------------------------------------------------
+-- -- Pane
+-- ----------------------------------------------------
+config.inactive_pane_hsb = {
+  brightness = 0.8,
+}
+
 ----------------------------------------------------
 -- keybinds
 ----------------------------------------------------
--- config.leader = { key = " ", mods = "CTRL", timeout_milliseconds = 2000 }
--- config.disable_default_key_bindings = true
--- config.keys = require("keybinds").keys
--- config.key_tables = require("keybinds").key_tables
-
--- tmuxを使うのでタブ機能やバーは無効化
-config.hide_tab_bar_if_only_one_tab = true
+config.leader = { key = " ", mods = "CTRL", timeout_milliseconds = 2000 }
+config.disable_default_key_bindings = true
+config.keys = require("keybinds").keys
+config.key_tables = require("keybinds").key_tables
 
 return config
