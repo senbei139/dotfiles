@@ -65,6 +65,12 @@ bomcheck() {
   hexdump ${1} | head -n 1
 }
 
+killport() {
+  kill -9 $(lsof -t -i:$1)
+}
+
+alias kp='killport'
+
 alias ls='ls -GF'
 alias ll='ls -lFG'
 alias la='ls -alFG'
@@ -75,11 +81,13 @@ alias lg='lazygit'
 # lazydocker
 alias lzd='lazydocker'
 
-# The next line updates PATH for the Google Cloud SDK.
-if [ -f '~/google-cloud-sdk/path.zsh.inc' ]; then . '~/google-cloud-sdk/path.zsh.inc'; fi
+alias ns='caffeinate -i'
+alias ccu='npx ccusage@latest'
 
-# The next line enables shell command completion for gcloud.
-if [ -f '~/google-cloud-sdk/completion.zsh.inc' ]; then . '~/google-cloud-sdk/completion.zsh.inc'; fi
+# wezterm
+imgcat() {
+  wezterm imgcat ${1}
+}
 
 export PATH="$PATH:$HOME/.orbstack/bin"
 
