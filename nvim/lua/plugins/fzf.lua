@@ -34,17 +34,18 @@ return {
         LazyVim.pick.open(ctx.__INFO.cmd, o)
       end
 
-      local img_previewer ---@type string[]?
-      for _, v in ipairs({
-        { cmd = "ueberzug", args = {} },
-        { cmd = "chafa", args = { "{file}", "--format=symbols" } },
-        { cmd = "viu", args = { "-b" } },
-      }) do
-        if vim.fn.executable(v.cmd) == 1 then
-          img_previewer = vim.list_extend({ v.cmd }, v.args)
-          break
-        end
-      end
+      local img_previewer
+      img_previewer = { "chafa", "{file}"}
+      -- for _, v in ipairs({
+      --   -- { cmd = "ueberzug", args = {} },
+      --   { cmd = "chafa", args = { "{file}", "--format=symbols" } },
+      --   -- { cmd = "viu", args = { "-b" } },
+      -- }) do
+      --   if vim.fn.executable(v.cmd) == 1 then
+      --     img_previewer = vim.list_extend({ v.cmd }, v.args)
+      --     break
+      --   end
+      -- end
 
       return {
         "default-title",

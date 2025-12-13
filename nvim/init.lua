@@ -3,6 +3,7 @@ require("lazy_nvim")
 require("indent")
 require("toggleterm")
 require("spell")
+require("nb")
 
 vim.api.nvim_exec('language en_US', true)
 vim.api.nvim_exec('lang en_US.UTF-8', true)
