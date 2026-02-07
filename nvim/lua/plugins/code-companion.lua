@@ -3,39 +3,32 @@ return {
   dependencies = {
     "nvim-lua/plenary.nvim",
     "nvim-treesitter/nvim-treesitter",
-    "ravitemer/mcphub.nvim"
+    "ravitemer/mcphub.nvim",
   },
   opts = function(_, opts)
     local base_opts = {
       strategies = {
         chat = {
           adapter = "anthropic",
+          roles = {
+            llm = function(adapter)
+              return "CodeCompanion (" .. adapter.formatted_name .. ")"
+            end,
+          },
         },
         inline = {
           adapter = "anthropic",
         },
-        -- agent = {
-        --   adapter = "openai",
-        -- },
       },
       adapters = {
         anthropic = function()
           return require("codecompanion.adapters").extend("anthropic", {
             env = {
-              api_key = "cmd:gpg --decrypt ~/.gpg/.anthropic-api-key.gpg 2>/dev/null",
+              api_key = "cmd: gpg --quiet --decrypt ~/.gpg/.anthropic-api-key.gpg",
             },
             schema = {
               model = {
-                default = "claude-3.7-sonnet",
-              },
-            },
-          })
-        end,
-        copilot = function()
-          return require("codecompanion.adapters").extend("copilot", {
-            schema = {
-              model = {
-                default = "claude-3.7-sonnet",
+                default = "claude-3-7-sonnet-20250219",
               },
             },
           })
@@ -56,7 +49,8 @@ return {
       },
       display = {
         chat = {
-          auto_scroll = false
+          auto_scroll = false,
+          show_header_separator = true,
         },
       },
       prompt_library = {
@@ -66,7 +60,7 @@ return {
           prompts = {
             {
               role = "system",
-              content = "You are an experienced developer with Lua and Neovim",
+              content = "あなたはコードの設計思想やアーキテクチャを重視する優秀なエンジニアです。"
             },
             {
               role = "user",
@@ -80,11 +74,28 @@ return {
           prompts = {
             {
               role = "system",
-              content = "You are an experienced developer with Lua and Neovim",
+              content = "あなたは経験豊富なシニアエンジニアです。"
             },
             {
               role = "user",
-              content = "コードを日本語でレビューしてください"
+              content = [[
+コードをレビューしてください
+**コンテキスト**
+- 言語:
+
+**レビュー観点**
+1. セキュリティ脆弱性の有無
+2. パフォーマンス上の問題
+3. エラーハンドリングの適切性
+4. コードの可読性・保守性
+
+**出力形式**
+- 優先度（高/中/低）を明記
+- 具体的な改善提案を含める
+- 可能であれば修正後のコード例を提示
+
+**レビュー対象コード**
+]]
             }
           },
         },
@@ -157,7 +168,7 @@ return {
               content = "コードの診断結果に従って問題を修正してください。修正内容の説明は日本語でお願いします"
             }
           },
-        }
+        },
         -- ["CopilotCommit"] = {
         --   strategy = "inline",
         --   description = "コミットメッセージの作成をお願いする",
@@ -185,13 +196,21 @@ return {
   end,
   keys = {
     {
-      "<Space>cc",
-      ":CodeCompanionChat Toggle<CR>",
+      "<leader>cf",
+      ":CodeCompanion<CR>",
+      mode = { "n", "v" },
       silent = true,
     },
     {
-      "<Space>ca",
+      "<leader>cc",
+      ":CodeCompanionChat<CR>",
+      mode = { "n", "v" },
+      silent = true,
+    },
+    {
+      "<leader>ca",
       ":CodeCompanionAction<CR>",
+      mode = { "n", "v" },
       silent = true,
     },
   },
