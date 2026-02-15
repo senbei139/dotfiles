@@ -15,4 +15,6 @@ sudo ln -sf ~/dotfiles/tmux-border /usr/local/bin/tmux-border
 ln -sf ~/dotfiles/lazygit/config.yml ~/.config/lazygit/config.yml
 ln -sf ~/dotfiles/wezterm/*.lua ~/.config/wezterm/
 ln -sf ~/dotfiles/.claude/CLAUDE.md ~/.claude/CLAUDE.md
+ln -sf ~/dotfiles/.claude/settings.json ~/.claude/settings.json
+ln -sf ~/dotfiles/.claude/statusline.sh ~/.claude/statusline.sh
 ln -sf ~/dotfiles/.gpg/.* ~/.gpg/
