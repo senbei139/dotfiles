@@ -1,0 +1,17 @@
+[include]
+    path = ~/.gitconfig.local
+[core]
+  pager = delta
+	excludesfile = ~/.gitignore_global
+[init]
+	defaultBranch = main
+[url "ssh://git@github.com/"]
+    insteadOf = https://github.com/
+[alias]
+  co = !git branch -a | fzf | xargs git checkout
+[ghq]
+	root = ~/workspace
+[delta]
+  side-by-side = true
+[interactive]
+  diffFilter = delta --color-only

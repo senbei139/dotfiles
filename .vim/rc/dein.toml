@@ -1,0 +1,82 @@
+[[plugins]]
+repo = 'Shougo/dein.vim'
+
+# git clone 後、実行すべきコマンドがある場合はこんな感じ
+# [[plugins]]
+# repo = 'Shougo/vimproc.vim'
+# hook_post_update = '''
+#   if dein#util#_is_windows()
+#     let cmd = 'tools\\update-dll-mingw'
+#   elseif dein#util#_is_cygwin()
+#     let cmd = 'make -f make_cygwin.mak'
+#   elseif executable('gmake')
+#     let cmd = 'gmake'
+#   else
+#     let cmd = 'make'
+#   endif
+#   let g:dein#plugin.build = cmd
+
+[[plugins]]
+repo = 'prabirshrestha/async.vim'
+merged = 0
+
+# LSP
+[[plugins]]
+repo = 'prabirshrestha/vim-lsp'
+
+[[plugins]]
+repo = 'mattn/vim-lsp-settings'
+
+[[plugins]]
+repo = 'Shougo/vimshell'
+rev = '3787e5'
+
+[[plugins]]
+repo = 'wlangstroth/vim-racket'
+
+
+[[plugins]]
+repo = 'Yggdroot/indentLine'
+
+[[plugins]]
+repo = 'editorconfig/editorconfig-vim'
+
+# Git operation
+[[plugins]]
+repo = 'tpope/vim-fugitive'
+
+[[plugins]]
+repo = 'airblade/vim-gitgutter'
+hood_add = '''
+  set updatetime=500
+'''
+
+# 依存関係を指定したいとき
+[[plugins]]
+repo    = 'vim-airline/vim-airline'
+depends = ['vim-airline-themes']
+
+[[plugins]]
+repo = 'vim-airline/vim-airline-themes'
+
+############# fzf #############
+[[plugins]]
+repo = 'junegunn/fzf'
+build_on = './install --all'
+merged = 0
+
+[[plugins]]
+repo = 'junegunn/fzf.vim'
+depends = 'fzf'
+hook_add = '''
+    command! -bang -nargs=* Rg
+    \ call fzf#vim#grep(
+    \ 'rg --column --line-number --hidden --ignore-case --no-heading --color=always '.shellescape(<q-args>), 1,
+    \ <bang>0 ? fzf#vim#with_preview({'options': '--delimiter : --nth 4..'}, 'up:60%')
+    \ : fzf#vim#with_preview({'options': '--delimiter : --nth 4..'}, 'right:50%:hidden', '?'),
+    \ <bang>0)
+'''
+
+############# color scheme #############
+[[plugins]]
+repo = 'jacoborus/tender.vim'

@@ -1,0 +1,37 @@
+repos:
+  # detect-secrets: 機密情報の検出
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: |
+          (?x)^(
+            .*\.lock$|
+            .*lock\.json$|
+            \.secrets\.baseline$
+          )$
+
+  # 一般的なpre-commitフック
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      # 秘密鍵の検出
+      - id: detect-private-key
+      # 大きなファイルの防止
+      - id: check-added-large-files
+        args: ['--maxkb=500']
+      # マージコンフリクトマーカーの検出
+      - id: check-merge-conflict
+      # 末尾空白の削除
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      # ファイル末尾の改行
+      - id: end-of-file-fixer
+      # YAML構文チェック
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+      # JSON構文チェック
+      - id: check-json
+      # シンボリックリンクの確認
+      - id: check-symlinks

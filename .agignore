@@ -1,0 +1,13 @@
+tmp
+vendor
+.vim/bundle
+.vim/dict
+.git
+libs
+jquery-*.js
+*.swp
+*.swo
+*.tags*
+*.gemtags*
+*.tmp*
+dataset

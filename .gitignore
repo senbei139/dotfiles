@@ -1,0 +1,14 @@
+colors/
+.DS_Store
+*.swp
+
+# 機密情報
+.gpg/
+*.key
+*.pem
+.env
+.env.*
+
+# ユーザー固有の設定
+.gitconfig.local
+*.local
