@@ -7,12 +7,6 @@ brew install zsh-syntax-highlighting
 brew install xwmx/taps/nb
 brew install fortune cowsay
 brew install gh ghq git-delta
-brew install --cask Zettlr
-
-brew install zsh-autosuggestions
-# brew install zsh-autocomplete
-# brew install zsh-completions
-brew install zsh-syntax-highlighting
 
 
 gopls version

@@ -8,7 +8,6 @@ ln -sf $DOTFILES_DIR/.tmux.conf ~/.tmux.conf
 ln -sf $DOTFILES_DIR/.agignore ~/.agignore
 ln -sf $DOTFILES_DIR/.gitconfig ~/.gitconfig
 ln -sf $DOTFILES_DIR/nvim/init.lua ~/.config/nvim/init.lua
-ln -sf $DOTFILES_DIR/nvim/lua/*.lua ~/.config/nvim/lua/
 ln -sf $DOTFILES_DIR/nvim/lua/plugins/*.lua ~/.config/nvim/lua/plugins/
 ln -sf $DOTFILES_DIR/nvim/lazy-lock.json ~/.config/nvim/lazy-lock.json
 ln -sf $DOTFILES_DIR/tmux-border /usr/local/bin/tmux-border
