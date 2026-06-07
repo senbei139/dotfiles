@@ -14,6 +14,12 @@
     ]
   },
   "enabledPlugins": {
-    "document-skills@anthropic-agent-skills": true
-  }
+    "document-skills@anthropic-agent-skills": true,
+    "typescript-lsp@claude-plugins-official": true
+  },
+  "language": "Japanese",
+  "effortLevel": "high",
+  "theme": "dark-daltonized",
+  "voiceEnabled": true,
+  "remoteControlAtStartup": true
 }
