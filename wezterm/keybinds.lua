@@ -107,7 +107,8 @@ return {
     { key = 'f', mods = 'CMD', action = act.Search 'CurrentSelectionOrEmptyString' },
     { key = 'l', mods = 'SHIFT|CTRL', action = act.ShowDebugOverlay },
     { key = 'n', mods = 'CMD', action = act.SpawnWindow },
-    { key = 'phys:Space', mods = 'SHIFT|CTRL', action = act.QuickSelect },
+    -- leader が SHIFT|CTRL+Space になったため退避
+    { key = 'phys:Space', mods = 'SHIFT|CMD', action = act.QuickSelect },
 
     -- copy and paste
     { key = '[', mods = 'LEADER', action = act.ActivateCopyMode },
