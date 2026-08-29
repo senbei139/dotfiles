@@ -49,7 +49,17 @@ export PATH=$PATH:$GOPATH/bin
 #
 # git
 fpath=($(brew --prefix)/share/zsh/site-functions $fpath)
-autoload -Uz compinit && compinit
+autoload -Uz compinit
+# compinit のフル実行は 300ms 近くかかる。ダンプが 24 時間以内なら検証を省く (-C)。
+# NOTE: glob 修飾子は配列代入の文脈でのみ評価される。[[ -n ~/.zcompdump(#q...) ]] と書くと
+#       extended_glob が無効な環境ではただの文字列になり、条件が常に真になってしまう。
+_zcompdump_fresh=(~/.zcompdump(N.mh-24))
+if (( $#_zcompdump_fresh )); then
+  compinit -C
+else
+  compinit
+fi
+unset _zcompdump_fresh
 
 setopt transient_rprompt
 PROMPT='%F{006}[%*] %n%f $ '
