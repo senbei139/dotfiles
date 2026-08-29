@@ -12,6 +12,8 @@ ln -sf $DOTFILES_DIR/nvim/lua/*.lua ~/.config/nvim/lua/
 ln -sf $DOTFILES_DIR/nvim/lua/plugins/*.lua ~/.config/nvim/lua/plugins/
 ln -sf $DOTFILES_DIR/nvim/lazy-lock.json ~/.config/nvim/lazy-lock.json
 ln -sf $DOTFILES_DIR/tmux-border /usr/local/bin/tmux-border
+# /usr/local/bin は root 所有なので sudo なしで置ける ~/.local/bin を使う
+ln -sf $DOTFILES_DIR/tmux-status ~/.local/bin/tmux-status
 ln -sf $DOTFILES_DIR/lazygit/config.yml ~/.config/lazygit/config.yml
 ln -sf $DOTFILES_DIR/wezterm/*.lua ~/.config/wezterm/
 ln -sf $DOTFILES_DIR/.claude/CLAUDE.md ~/.claude/CLAUDE.md

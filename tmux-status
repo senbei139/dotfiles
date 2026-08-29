@@ -1,0 +1,97 @@
+#!/bin/zsh
+#
+# tmux のステータスライン用セグメントを生成する。
+# 出力には tmux の書式指定 (#[...]) をそのまま含めてよい。
+#
+#   tmux-status git <path>  -> ブランチと作業ツリーの状態
+#
+# NOTE: ステータス更新のたびに呼ばれるため、git の呼び出しは最小限に抑える。
+#       --no-optional-locks を付けてインデックスのロックを取らせない
+#       (裏で走っている git コマンドを待たせないため)。
+
+emulate -L zsh
+
+FG_DIM="#5F6368"
+ACCENT_GREEN="#34A853"
+ACCENT_YELLOW="#FBBC04"
+ACCENT_RED="#EA4335"
+ACCENT_CYAN="#24C1E0"
+
+# 直接コミットしたくないブランチ。ここにいるときはブランチ名を赤で出す
+PROTECTED_BRANCHES=(main master release develop)
+
+git_segment() {
+  local repo_dir=$1
+  # NOTE: zsh の $path は $PATH と連動する特殊変数なので変数名に使わない
+  [[ -n $repo_dir && -d $repo_dir ]] || return 0
+
+  local git_dir
+  git_dir=$(git --no-optional-locks -C $repo_dir rev-parse --absolute-git-dir 2>/dev/null) || return 0
+
+  local branch="" oid="" line
+  local -i ahead=0 behind=0 staged=0 unstaged=0 untracked=0 conflict=0
+
+  # --porcelain=v2 --branch なら「ブランチ名・追跡差分・作業ツリーの状態」を
+  # 1回の呼び出しでまとめて取得できる
+  while IFS= read -r line; do
+    case $line in
+      '# branch.oid '*)  oid=${line#\# branch.oid } ;;
+      '# branch.head '*) branch=${line#\# branch.head } ;;
+      '# branch.ab '*)
+        local ab=${line#\# branch.ab }
+        ahead=${${ab%% *}#+}
+        behind=${${ab##* }#-}
+        ;;
+      # "1 <XY> ..." / "2 <XY> ..." の XY がインデックスと作業ツリーの状態
+      [12]' '*)
+        local xy=${line[3,4]}
+        if [[ ${xy[1]} != '.' ]]; then (( staged++ )); fi
+        if [[ ${xy[2]} != '.' ]]; then (( unstaged++ )); fi
+        ;;
+      'u '*) (( conflict++ )) ;;
+      '? '*) (( untracked++ )) ;;
+    esac
+  done < <(git --no-optional-locks -C $repo_dir status --porcelain=v2 --branch 2>/dev/null)
+
+  # detached HEAD ならコミットハッシュで代用する
+  if [[ -z $branch || $branch == '(detached)' ]]; then
+    branch="@${oid[1,7]}"
+  fi
+
+  local branch_color=$ACCENT_CYAN
+  if (( ${PROTECTED_BRANCHES[(Ie)$branch]} )); then
+    branch_color=$ACCENT_RED
+  fi
+
+  local out="#[fg=${branch_color}] ${branch}"
+
+  (( ahead > 0 ))  && out+="#[fg=${ACCENT_GREEN}] ↑${ahead}"
+  (( behind > 0 )) && out+="#[fg=${ACCENT_RED}] ↓${behind}"
+
+  (( staged > 0 ))    && out+="#[fg=${ACCENT_GREEN}] +${staged}"
+  (( unstaged > 0 ))  && out+="#[fg=${ACCENT_YELLOW}] ~${unstaged}"
+  (( untracked > 0 )) && out+="#[fg=${FG_DIM}] ?${untracked}"
+  (( conflict > 0 ))  && out+="#[fg=${ACCENT_RED}] !${conflict}"
+
+  # rebase / merge などの作業中は取り違えると事故になるので目立たせる
+  local progress=""
+  if [[ -d $git_dir/rebase-merge || -d $git_dir/rebase-apply ]]; then
+    progress="REBASE"
+  elif [[ -f $git_dir/MERGE_HEAD ]]; then
+    progress="MERGE"
+  elif [[ -f $git_dir/CHERRY_PICK_HEAD ]]; then
+    progress="CHERRY-PICK"
+  elif [[ -f $git_dir/REVERT_HEAD ]]; then
+    progress="REVERT"
+  elif [[ -f $git_dir/BISECT_LOG ]]; then
+    progress="BISECT"
+  fi
+  [[ -n $progress ]] && out+="#[fg=${ACCENT_RED}]#[bold] ${progress}#[nobold]"
+
+  print -rn -- "${out}#[default]"
+}
+
+case $1 in
+  git) git_segment "$2" ;;
+  *)   print -u2 "usage: ${0:t} git <path>"; exit 1 ;;
+esac
