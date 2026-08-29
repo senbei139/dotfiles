@@ -8,6 +8,12 @@ brew install xwmx/taps/nb
 brew install fortune cowsay
 brew install gh ghq git-delta
 
+# --- pre-commit ---
+# 機密情報の混入を防ぐフック。.git/hooks は git 管理外なので、
+# clone した環境ごとに install しないと .pre-commit-config.yaml があっても動かない
+brew install pre-commit
+(cd "$(dirname "$0")" && pre-commit install)
+
 
 gopls version
 pyright --version
