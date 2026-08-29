@@ -1,5 +1,9 @@
 {
-  "permissions": {},
+  "permissions": {
+    "allow": [
+      "mcp__pencil"
+    ]
+  },
   "hooks": {
     "Stop": [
       {
@@ -15,11 +19,13 @@
   },
   "enabledPlugins": {
     "document-skills@anthropic-agent-skills": true,
-    "typescript-lsp@claude-plugins-official": true
+    "typescript-lsp@claude-plugins-official": true,
+    "pyright-lsp@claude-plugins-official": true
   },
   "language": "Japanese",
   "effortLevel": "high",
   "theme": "dark-daltonized",
+  "remoteControlAtStartup": true,
   "voiceEnabled": true,
-  "remoteControlAtStartup": true
+  "tui": "fullscreen"
 }
