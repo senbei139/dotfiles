@@ -119,7 +119,7 @@ imgcat() {
 export PATH="$PATH:$HOME/.orbstack/bin"
 
 # bun completions
-[ -s "~/.bun/_bun" ] && source "~/.bun/_bun"
+[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
 # bun
 export BUN_INSTALL="$HOME/.bun"
