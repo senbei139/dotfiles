@@ -14,7 +14,8 @@ export PATH=$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$PATH
 export DOTFILES_DIR="$HOME/workspace/github.com/$USERNAME/dotfiles"
 
 export LANG=ja_JP.UTF-8
-export TERM=xterm-256color
+# NOTE: TERM は端末側が設定する (tmux 内なら tmux-256color、素の wezterm なら xterm-256color)。
+#       ここで export すると tmux の default-terminal を上書きしてしまうので設定しない。
 export KEYTIMEOUT=1
 export HISTCONTROL=ignoredups
 setopt nonomatch
