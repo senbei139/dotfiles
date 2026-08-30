@@ -1,0 +1,30 @@
+#!/bin/zsh
+#
+# tmux のウィンドウを fzf であいまい検索して切り替える。
+# prefix + W から display-popup 経由で呼ばれる。
+#
+# 全セッションのウィンドウを 1 つの平坦なリストにするので、セッションをまたいだ移動も
+# そのまま選べる。ツリー表示 (prefix + w) が全体を眺める用途なのに対し、
+# こちらは行き先が分かっていて速く飛びたいとき用。
+#
+# 色は .tmux.conf のパレットに揃える (選択行 = 緑 = 選択中)。
+
+emulate -L zsh
+
+# 1 列目に切り替え先を隠し持たせ、表示は 2 列目だけにする
+local target
+target=$(
+  tmux list-windows -a -F '#{session_name}:#{window_index}|#{?window_active,●,·}|#{session_name}|#{window_name}|#{pane_current_path}' |
+  awk -F'|' -v home="$HOME" '{
+    p = $5; sub("^" home, "~", p)
+    printf "%s\t%s %-10s %-12s %s\n", $1, $2, $3, $4, p
+  }' |
+  fzf --delimiter=$'\t' --with-nth=2 --no-multi --reverse --height=100% \
+      --prompt='window > ' --info=inline \
+      --color='bg+:#34A853,fg+:#1f2022,prompt:#6A90CD,pointer:#34A853,info:#5F6368,border:#5F6368'
+) || exit 0
+
+# fzf を抜けただけのときは何もしない
+[[ -n $target ]] || exit 0
+
+tmux switch-client -t "${target%%$'\t'*}"
