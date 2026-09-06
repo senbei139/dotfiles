@@ -1,0 +1,240 @@
+#!/bin/zsh
+#
+# tmux のセッション / ウィンドウ一覧をテキストとして $EDITOR で開き、
+# 保存した内容との差分を tmux のコマンドに変換して反映する (oil.nvim 方式)。
+# prefix + o から display-popup 経由で呼ばれる。
+#
+#   名前を書き換える            -> rename-session / rename-window
+#   行を消す                    -> kill-session / kill-window
+#   ID のない行を足す           -> new-session / new-window
+#   ウィンドウ行を別の下へ移す  -> move-window
+#
+# 行頭の `$N` / `@N` は tmux のセッション ID・ウィンドウ ID で、これが行の同一性になる。
+# 消さずに残すこと。ID を消して名前だけ残すと「削除 + 新規作成」として扱われる。
+#
+# -y を付けると確認プロンプトを出さずに適用する (テスト用)。
+
+emulate -L zsh
+setopt extended_glob
+
+local assume_yes=0
+[[ $1 == (-y|--yes) ]] && assume_yes=1
+
+# ------------------------------------------------------------------ 現在の状態
+
+typeset -A orig_sname orig_wname orig_wsess
+local sid sname wid wname wpath rec
+local -a snap fields
+
+# バッファと突き合わせる元データは 1 回のスナップショットから作る。
+# automatic-rename でウィンドウ名は勝手に変わるので、2 回引くと空振りの rename が出る。
+snap=(${(f)"$(tmux list-windows -a -F '#{session_id}|#{session_name}|#{window_id}|#{window_name}|#{pane_current_path}')"})
+
+for rec in $snap; do
+  fields=("${(@s:|:)rec}")
+  orig_sname[${fields[1]}]=${fields[2]}
+  orig_wsess[${fields[3]}]=${fields[1]}
+  orig_wname[${fields[3]}]=${fields[4]}
+done
+
+# エラーはポップアップが閉じると読めなくなるので、キーを待ってから終わる
+die() {
+  print -u2 -- "$@"
+  read -k 1 '?何かキーを押すと閉じる ' < /dev/tty
+  exit 1
+}
+
+# セッションキー (既存なら $N、新規なら new:名前) を表示用の名前にする
+sess_label() {
+  [[ $1 == new:* ]] && { print -r -- "${1#new:}"; return }
+  print -r -- "${orig_sname[$1]}"
+}
+
+# ------------------------------------------------------------------ バッファ生成
+
+local tmpdir buffer
+tmpdir=$(mktemp -d -t tmux-oil) || exit 1
+# 拡張子を付けて $EDITOR の filetype 判定を安定させる (conf 扱いになりコメントが色付く)
+buffer=$tmpdir/tmux-oil.conf
+# 中断しても消えるようにしておく
+trap 'rm -rf $tmpdir' EXIT INT TERM
+
+{
+  print -r -- '# tmux-oil — :w で反映 / :q! で中止'
+  print -r -- '#'
+  print -r -- '#   名前を書き換える           -> rename'
+  print -r -- '#   行を消す                   -> kill'
+  print -r -- '#   ID ($N / @N) のない行を足す -> 新規作成 (字下げなし = session, 字下げあり = window)'
+  print -r -- '#   ウィンドウ行を別の下へ移す -> move-window'
+  print -r -- '#'
+  print -r -- '#   行頭の ID は行の同一性なので消さないこと。既存行のパス列は編集しても無視される。'
+  print -r -- ''
+  local prev=''
+  for rec in $snap; do
+    fields=("${(@s:|:)rec}")
+    if [[ ${fields[1]} != $prev ]]; then
+      prev=${fields[1]}
+      print -r -- "${fields[1]}  ${fields[2]}/"
+    fi
+    printf '  %-5s %-14s %s\n' "${fields[3]}" "${fields[4]}" "${${fields[5]}/#$HOME/~}"
+  done
+} > $buffer
+
+local before=$(md5 -q $buffer 2>/dev/null || md5sum $buffer)
+
+${EDITOR:-vim} $buffer || die "editor が異常終了したので中止した"
+
+local after=$(md5 -q $buffer 2>/dev/null || md5sum $buffer)
+if [[ $before == $after ]]; then
+  print "変更なし"
+  exit 0
+fi
+
+# ------------------------------------------------------------------ 編集結果の解析
+
+typeset -A seen_sess seen_win        # 残っている既存 ID
+typeset -A sess_rename win_rename    # ID -> 新しい名前
+typeset -A win_move                  # ウィンドウ ID -> 移動先のセッションキー
+typeset -A new_windows               # セッションキー -> "名前\tパス" を改行で連結
+local -a new_sessions                # 新規セッション名 (順序を保つ)
+local -a plan
+local cur_sess='' line rest
+
+while IFS= read -r line; do
+  [[ -z ${line//[[:space:]]/} ]] && continue
+  [[ ${line##[[:space:]]#} == '#'* ]] && continue
+
+  if [[ $line == [[:space:]]* ]]; then
+    # ---- ウィンドウ行
+    rest=${line##[[:space:]]#}
+    if [[ -z $cur_sess ]]; then
+      die "セッション行より前にウィンドウ行がある: $line"
+    fi
+    if [[ $rest == @[0-9]##[[:space:]]* || $rest == @[0-9]## ]]; then
+      wid=${rest%%[[:space:]]*}
+      rest=${rest#$wid}
+      rest=${rest##[[:space:]]#}
+      wname=${rest%%[[:space:]]*}
+      [[ -n ${orig_wname[$wid]} ]] || die "知らないウィンドウ ID: $wid"
+      seen_win[$wid]=1
+      [[ -n $wname && $wname != ${orig_wname[$wid]} ]] && win_rename[$wid]=$wname
+      [[ $cur_sess != ${orig_wsess[$wid]} ]] && win_move[$wid]=$cur_sess
+    else
+      wname=${rest%%[[:space:]]*}
+      wpath=${rest#$wname}
+      wpath=${wpath##[[:space:]]#}
+      new_windows[$cur_sess]+="$wname	$wpath"$'\n'
+    fi
+  else
+    # ---- セッション行
+    rest=$line
+    if [[ $rest == \$[0-9]##[[:space:]]* || $rest == \$[0-9]## ]]; then
+      sid=${rest%%[[:space:]]*}
+      rest=${rest#$sid}
+      rest=${rest##[[:space:]]#}
+      sname=${${rest%%[[:space:]]*}%/}
+      [[ -n ${orig_sname[$sid]} ]] || die "知らないセッション ID: $sid"
+      seen_sess[$sid]=1
+      [[ -n $sname && $sname != ${orig_sname[$sid]} ]] && sess_rename[$sid]=$sname
+      cur_sess=$sid
+    else
+      sname=${${rest%%[[:space:]]*}%/}
+      [[ -n $sname ]] || continue
+      new_sessions+=($sname)
+      cur_sess="new:$sname"
+    fi
+  fi
+done < $buffer
+
+# ------------------------------------------------------------------ 実行計画
+
+for sid in ${(k)sess_rename}; do
+  plan+=("rename  session $sid  ${orig_sname[$sid]} -> ${sess_rename[$sid]}")
+done
+for wid in ${(k)win_rename}; do
+  plan+=("rename  window  $wid  ${orig_wname[$wid]} -> ${win_rename[$wid]}")
+done
+for sname in $new_sessions; do
+  plan+=("new     session      $sname")
+done
+for cur_sess in ${(k)new_windows}; do
+  for line in ${(f)new_windows[$cur_sess]}; do
+    plan+=("new     window       $(sess_label $cur_sess) / ${line%%	*}")
+  done
+done
+for wid in ${(k)win_move}; do
+  plan+=("move    window  $wid  -> $(sess_label ${win_move[$wid]})")
+done
+for wid in ${(k)orig_wname}; do
+  [[ -n ${seen_win[$wid]} ]] || plan+=("kill    window  $wid  (${orig_wname[$wid]})")
+done
+for sid in ${(k)orig_sname}; do
+  [[ -n ${seen_sess[$sid]} ]] || plan+=("kill    session $sid  (${orig_sname[$sid]})")
+done
+
+if (( ${#plan} == 0 )); then
+  print "変更なし"
+  exit 0
+fi
+
+print -l -- "${(@)plan}"
+print ''
+if (( ! assume_yes )); then
+  read -q "?この内容で適用する? [y/N] " < /dev/tty || { print "\n中止した"; exit 0 }
+  print ''
+fi
+
+# ------------------------------------------------------------------ 適用
+
+# 1. リネーム
+for sid in ${(k)sess_rename}; do
+  tmux rename-session -t "$sid" "${sess_rename[$sid]}"
+done
+for wid in ${(k)win_rename}; do
+  tmux rename-window -t "$wid" "${win_rename[$wid]}"
+done
+
+# 2. 新規セッション。中身は後で作るので、自動で付いてくるウィンドウは控えておく
+typeset -A sess_key placeholder
+for sname in $new_sessions; do
+  sess_key[new:$sname]=$(tmux new-session -dP -F '#{session_id}' -s "$sname")
+  placeholder[new:$sname]=$(tmux list-windows -t "${sess_key[new:$sname]}" -F '#{window_id}')
+done
+for sid in ${(k)orig_sname}; do
+  sess_key[$sid]=$sid
+done
+
+# 3. 新規ウィンドウ
+for cur_sess in ${(k)new_windows}; do
+  for line in ${(f)new_windows[$cur_sess]}; do
+    wname=${line%%	*}
+    wpath=${line#*	}
+    if [[ -n $wpath ]]; then
+      tmux new-window -d -t "${sess_key[$cur_sess]}:" -n "$wname" -c "${wpath/#\~/$HOME}"
+    else
+      tmux new-window -d -t "${sess_key[$cur_sess]}:" -n "$wname"
+    fi
+  done
+done
+
+# 4. 移動
+for wid in ${(k)win_move}; do
+  tmux move-window -s "$wid" -t "${sess_key[${win_move[$wid]}]}:"
+done
+
+# 5. 中身が入った新規セッションの、自動で付いてきたウィンドウを片付ける
+for cur_sess in ${(k)placeholder}; do
+  if (( $(tmux list-windows -t "${sess_key[$cur_sess]}" -F x | wc -l) > 1 )); then
+    tmux kill-window -t "${placeholder[$cur_sess]}"
+  fi
+done
+
+# 6. 削除。セッションを先に消すと中のウィンドウ ID も消えるので、ウィンドウから
+for wid in ${(k)orig_wname}; do
+  [[ -n ${seen_win[$wid]} ]] || tmux kill-window -t "$wid" 2>/dev/null
+done
+for sid in ${(k)orig_sname}; do
+  [[ -n ${seen_sess[$sid]} ]] || tmux kill-session -t "$sid" 2>/dev/null
+done
+
+exit 0
