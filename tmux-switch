@@ -19,17 +19,31 @@ emulate -L zsh
 # fzf の reload/execute から自分を呼び直すので、シンボリックリンクを解決した実体を持つ
 local self=${0:A}
 
-local FZF_COLORS='bg+:#5FA3A3,fg+:#1f2022,prompt:#6A90CD,pointer:#5FA3A3,info:#5F6368,border:#5F6368,header:#5F6368'
+# 行ごとに色を付けると、選択行を反転させたときに文字色が背景に埋もれる
+# (青 #6A90CD on ティール #5FA3A3 で 1.1:1)。選択中はティールのポインタで示す
+local FZF_COLORS='bg+:-1,fg+:-1,hl:#24C1E0,hl+:#24C1E0,prompt:#6A90CD,pointer:#5FA3A3,info:#5F6368,border:#5F6368,header:#5F6368'
 
 # 1 列目に切り替え先 (session:index) を隠し持たせ、表示は 2 列目だけにする。
+# セッションを独立した列にして罫線で区切り、階層が一目で分かるようにする。
+# 色は .tmux.conf のパレットをそのまま使う (セッション名 = 青。フッターと同じ扱い)
 # 並びは #{window_activity} の降順 = 最近使った順 (choose-tree の -O time と同じ基準)
 list_windows() {
   tmux list-windows -a -F '#{window_activity}|#{session_name}:#{window_index}|#{?window_active,●,·}|#{session_name}|#{window_name}|#{pane_current_path}' |
     sort -t'|' -k1,1 -rn |
-    awk -F'|' -v home="$HOME" '{
-      p = $6; sub("^" home, "~", p)
-      printf "%s\t%s %-10s %-12s %s\n", $2, $3, $4, $5, p
-    }'
+    awk -F'|' -v home="$HOME" '
+      BEGIN {
+        BLUE   = "\033[38;2;106;144;205m"
+        TEAL   = "\033[38;2;95;163;163m"
+        BRIGHT = "\033[38;2;232;234;237m"
+        DIM    = "\033[38;2;95;99;104m"
+        OFF    = "\033[0m"
+      }
+      {
+        p = $6; sub("^" home, "~", p)
+        mark = ($3 == "●") ? TEAL $3 OFF : DIM $3 OFF
+        printf "%s\t%s%-10s%s%s│%s %s %s%-12s%s %s%s%s\n", \
+          $2, BLUE, $4, OFF, DIM, OFF, mark, BRIGHT, $5, OFF, DIM, p, OFF
+      }'
 }
 
 # ターゲット行から書式を 1 つ取り出す
@@ -137,7 +151,7 @@ fi
 local out key target
 out=$(
   print -r -- "$list" |
-  fzf --delimiter=$'\t' --with-nth=2 --no-multi --reverse --height=100% \
+  fzf --delimiter=$'\t' --with-nth=2 --no-multi --reverse --height=100% --ansi \
       --prompt='window > ' --info=inline --expect=ctrl-e \
       --header=$'j/k move    /  search    q quit\n^r rename window   ^s rename session   ^x kill\n^t new window      ^n new session      ^e edit all' \
       --bind="${(j:,:)ignores}" \
