@@ -1,28 +1,168 @@
 #!/bin/zsh
 #
 # tmux のウィンドウを fzf であいまい検索して切り替える。
-# prefix + W から display-popup 経由で呼ばれる。
+# prefix + w から display-popup 経由で呼ばれる、セッション / ウィンドウ操作の唯一の入口。
 #
 # 全セッションのウィンドウを 1 つの平坦なリストにするので、セッションをまたいだ移動も
-# そのまま選べる。ツリー表示 (prefix + w) が全体を眺める用途なのに対し、
-# こちらは行き先が分かっていて速く飛びたいとき用。
+# そのまま選べる。並びは最近使った順。右のプレビューには選択中のウィンドウの実画面を出す
+# (choose-tree の -O time とプレビューの代わり)。
+#
+# 切り替えだけでなく、リネーム・新規作成・削除もこの画面から行える (ヘッダ参照)。
+# まとめて整理したいときは ^e で tmux-oil のバッファ編集へ抜ける。
+#
+# 操作は vim 風のモーダル。通常モードは j/k で移動、/ で検索モードに入る。
 #
 # 色は .tmux.conf のパレットに揃える (選択行 = ティール = 選択中)。
 
 emulate -L zsh
 
-# 1 列目に切り替え先を隠し持たせ、表示は 2 列目だけにする
-local target
-target=$(
-  tmux list-windows -a -F '#{session_name}:#{window_index}|#{?window_active,●,·}|#{session_name}|#{window_name}|#{pane_current_path}' |
-  awk -F'|' -v home="$HOME" '{
-    p = $5; sub("^" home, "~", p)
-    printf "%s\t%s %-10s %-12s %s\n", $1, $2, $3, $4, p
-  }' |
+# fzf の reload/execute から自分を呼び直すので、シンボリックリンクを解決した実体を持つ
+local self=${0:A}
+
+local FZF_COLORS='bg+:#5FA3A3,fg+:#1f2022,prompt:#6A90CD,pointer:#5FA3A3,info:#5F6368,border:#5F6368,header:#5F6368'
+
+# 1 列目に切り替え先 (session:index) を隠し持たせ、表示は 2 列目だけにする。
+# 並びは #{window_activity} の降順 = 最近使った順 (choose-tree の -O time と同じ基準)
+list_windows() {
+  tmux list-windows -a -F '#{window_activity}|#{session_name}:#{window_index}|#{?window_active,●,·}|#{session_name}|#{window_name}|#{pane_current_path}' |
+    sort -t'|' -k1,1 -rn |
+    awk -F'|' -v home="$HOME" '{
+      p = $6; sub("^" home, "~", p)
+      printf "%s\t%s %-10s %-12s %s\n", $2, $3, $4, $5, p
+    }'
+}
+
+# ターゲット行から書式を 1 つ取り出す
+window_fmt() { tmux display-message -p -t "$1" "$2" }
+
+# tmux コマンドの失敗はポップアップが閉じると読めなくなる (重複した名前での rename など)。
+# キーを待ってから戻る。-P 付きの作成コマンド用に、成功時は出力をそのまま返す
+run_tmux() {
+  local out
+  if ! out=$(tmux "$@" 2>&1); then
+    print -u2 -- "${out:-tmux $* に失敗した}"
+    read -k 1 '?何かキーを押すと戻る ' < /dev/tty
+    return 1
+  fi
+  [[ -n $out ]] && print -r -- "$out"
+  return 0
+}
+
+# 名前の入力。シェルの read は Esc を拾えず抜けられなくなるので、空リストの fzf を
+# 入力欄として使う。Esc / ^C なら 130 が返るのでそれを中止として扱う
+prompt_input() {
+  local out ret
+  out=$(fzf --print-query --reverse --height=100% --info=hidden --no-mouse \
+            --prompt="$1" --query="$2" --color="$FZF_COLORS" < /dev/null)
+  ret=$?
+  (( ret == 130 )) && return 1
+  print -r -- "${out%%$'\n'*}"
+}
+
+# サブコマンド: fzf の中から呼ばれる側
+case $1 in
+  --list)
+    list_windows
+    exit 0
+    ;;
+  --rename-window)
+    local target=$2 name
+    [[ -n $target ]] || exit 0
+    name=$(prompt_input 'rename window > ' "$(window_fmt $target '#{window_name}')") || exit 0
+    [[ -n $name ]] && run_tmux rename-window -t "$target" "$name"
+    exit 0
+    ;;
+  --rename-session)
+    local target=$2 name
+    [[ -n $target ]] || exit 0
+    name=$(prompt_input 'rename session > ' "${target%%:*}") || exit 0
+    [[ -n $name ]] && run_tmux rename-session -t "${target%%:*}" "$name"
+    exit 0
+    ;;
+  --new-session)
+    # 作ったら移動する。fzf 側は +abort なので、ここを抜けるとポップアップは閉じる
+    local name new
+    name=$(prompt_input 'new session > ' '') || exit 0
+    [[ -n $name ]] || exit 0
+    new=$(run_tmux new-session -dP -F '#{session_name}:#{window_index}' -s "$name") || exit 0
+    tmux switch-client -t "$new"
+    exit 0
+    ;;
+  --new-window)
+    # 選択中のウィンドウと同じセッション・同じディレクトリに作って移動する
+    local target=$2 new
+    [[ -n $target ]] || exit 0
+    new=$(run_tmux new-window -dP -F '#{session_name}:#{window_index}' \
+            -t "${target%%:*}:" -c "$(window_fmt $target '#{pane_current_path}')") || exit 0
+    tmux switch-client -t "$new"
+    exit 0
+    ;;
+  --kill-window)
+    local target=$2
+    [[ -n $target ]] || exit 0
+    # y 以外のキー (Esc を含む) はすべて中止
+    read -q "?kill $target ($(window_fmt $target '#{window_name}'))?  [y] 削除 / 他のキーで中止 " < /dev/tty || exit 0
+    run_tmux kill-window -t "$target"
+    exit 0
+    ;;
+esac
+
+# vim 風のモーダル操作にする。通常モードでは文字キーをクエリに入れず j/k の移動を優先し、
+# / を押したときだけ検索できるようにする (モードの判別にはプロンプトの文字列を使う)
+local -a printable ignores
+local ch
+printable=({a..z} {A..Z} {0..9} space)
+for ch in $printable; do
+  # 通常モードでコマンドとして使うキーは殺さない
+  [[ $ch == (j|k|g|G|q) ]] && continue
+  ignores+=("$ch:ignore")
+done
+local typing_keys="${(j:,:)printable},/"
+
+# 先頭は今いるウィンドウなので、そのままだと Enter が空振りになる。
+# 1 つ下から始めて「直前に使っていたウィンドウへ戻る」を Enter だけでできるようにする
+local list start_bind
+list=$(list_windows)
+if [[ ${list%%$'\t'*} == $(tmux display-message -p '#{session_name}:#{window_index}') \
+      && ${#${(f)list}} -gt 1 ]]; then
+  # start はリスト読み込み前に発火して効かないので load を使う。
+  # load は reload のたびに来るので、一度動かしたら自分を外す
+  start_bind='load:down+unbind(load)'
+else
+  start_bind='load:ignore'
+fi
+
+# ^e は fzf の中では実行しない。ここは $( ) の中なので端末が繋がっておらず、
+# $EDITOR がまともに動かないため、キーだけ受け取って抜けた後に exec する
+local out key target
+out=$(
+  print -r -- "$list" |
   fzf --delimiter=$'\t' --with-nth=2 --no-multi --reverse --height=100% \
-      --prompt='window > ' --info=inline \
-      --color='bg+:#5FA3A3,fg+:#1f2022,prompt:#6A90CD,pointer:#5FA3A3,info:#5F6368,border:#5F6368'
+      --prompt='window > ' --info=inline --expect=ctrl-e \
+      --header=$'j/k move    /  search    q quit\n^r rename window   ^s rename session   ^x kill\n^t new window      ^n new session      ^e edit all' \
+      --bind="${(j:,:)ignores}" \
+      --bind='j:down,k:up,g:first,G:last,q:abort' \
+      --bind="$start_bind" \
+      --bind="/:unbind($typing_keys)+change-prompt(/)" \
+      --bind="esc:transform:if [[ \$FZF_PROMPT == '/' ]]; then echo 'rebind($typing_keys)+change-prompt(window > )+clear-query'; else echo abort; fi" \
+      --preview='tmux capture-pane -ep -t {1}' \
+      --preview-window='right,50%,border-left' \
+      --bind="ctrl-r:execute($self --rename-window {1})+reload($self --list)" \
+      --bind="ctrl-s:execute($self --rename-session {1})+reload($self --list)" \
+      --bind="ctrl-x:execute($self --kill-window {1})+reload($self --list)" \
+      --bind="ctrl-t:execute($self --new-window {1})+abort" \
+      --bind="ctrl-n:execute($self --new-session)+abort" \
+      --color="$FZF_COLORS"
 ) || exit 0
+
+key=${out%%$'\n'*}
+target=${out#*$'\n'}
+
+if [[ $key == ctrl-e ]]; then
+  ${self:h}/tmux-oil
+  # 編集を終えたら一覧へ戻る (結果をその場で確認できる)。閉じるのは一覧の q
+  exec $self
+fi
 
 # fzf を抜けただけのときは何もしない
 [[ -n $target ]] || exit 0
