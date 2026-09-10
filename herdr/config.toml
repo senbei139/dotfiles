@@ -12,7 +12,10 @@ prefix = "ctrl+space"
 # c: 新規作成 / r: リネーム / w: 選択画面 / N・P: 前後へ移動
 new_workspace = "prefix+c"
 rename_workspace = "prefix+r"
-workspace_picker = "prefix+w"
+# w: 選択画面。tmux-switch と同じく、j/k で移動して / で絞り込む
+# (goto は workspace / tab / pane のツリーを検索できる。素の一覧は g に退避)
+goto = "prefix+w"
+workspace_picker = "prefix+g"
 next_workspace = "prefix+shift+n"
 previous_workspace = "prefix+shift+p"
 close_workspace = "prefix+shift+d"
