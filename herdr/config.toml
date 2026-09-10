@@ -60,6 +60,9 @@ pane_gaps = false
 # スクロールバーの列は使わない (tmux にはない要素)
 pane_scrollbars = false
 
+# tab の行は下に置く (tmux のステータスラインと同じ位置)
+tab_bar_position = "bottom"
+
 # フォーカスに追随する。{pane} は名前を付けたペインでだけ出る
 window_title = "{hostname}: {workspace} / {pane}"
 
