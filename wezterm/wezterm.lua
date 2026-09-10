@@ -19,7 +19,10 @@ config.colors = require("colors")
 
 -- config.macos_window_background_blur = 20
 
--- config.window_decorations = "RESIZE"
+-- macOS のウィンドウ影を消す。TITLE を残したまま影だけ落とすには
+-- MACOS_FORCE_DISABLE_SHADOW が要る (影はウィンドウ生成時に決まるので
+-- 変更後は新しいウィンドウで確認する)
+config.window_decorations = "TITLE | RESIZE | MACOS_FORCE_DISABLE_SHADOW"
 --
 -- window size
 config.adjust_window_size_when_changing_font_size = false
