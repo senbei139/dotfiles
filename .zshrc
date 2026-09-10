@@ -145,3 +145,6 @@ alias todo='nb e todo.md'
 
 # kiro
 [[ "$TERM_PROGRAM" == "kiro" ]] && . "$(kiro --locate-shell-integration-path zsh)"
+
+# agtws (agentworkspace)
+export PATH="$HOME/bin:$PATH"
