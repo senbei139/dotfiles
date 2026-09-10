@@ -16,6 +16,7 @@ ln -sf $DOTFILES_DIR/tmux-status ~/.local/bin/tmux-status
 ln -sf $DOTFILES_DIR/tmux-switch ~/.local/bin/tmux-switch
 ln -sf $DOTFILES_DIR/tmux-oil ~/.local/bin/tmux-oil
 ln -sf $DOTFILES_DIR/lazygit/config.yml ~/.config/lazygit/config.yml
+ln -sf $DOTFILES_DIR/herdr/config.toml ~/.config/herdr/config.toml
 ln -sf $DOTFILES_DIR/wezterm/*.lua ~/.config/wezterm/
 ln -sf $DOTFILES_DIR/.claude/CLAUDE.md ~/.claude/CLAUDE.md
 ln -sf $DOTFILES_DIR/.claude/settings.json ~/.claude/settings.json

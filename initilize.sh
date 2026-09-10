@@ -9,6 +9,12 @@ brew install --cask wezterm
 # セットで入れる。これが無いと選択画面が丸ごと動かない
 brew install tmux fzf
 brew install zsh-syntax-highlighting
+
+# --- herdr ---
+# AI エージェント向けのターミナルワークスペース。キーバインドは tmux に合わせてある
+# (herdr/config.toml)
+brew install herdr
+
 brew install xwmx/taps/nb
 brew install fortune cowsay
 brew install gh ghq git-delta

@@ -1,0 +1,68 @@
+# herdr (AI エージェント向けターミナルワークスペース)
+# キーバインドは .tmux.conf に合わせている。
+# 対応関係: workspace = tmux の session / tab = tmux の window / pane = pane
+# 変更したら `herdr config check` で検証し、`herdr server reload-config` で反映する。
+
+onboarding = false
+
+[keys]
+prefix = "ctrl+space"
+
+## workspace (tmux の session)
+# c: 新規作成 / r: リネーム / w: 選択画面 / N・P: 前後へ移動
+new_workspace = "prefix+c"
+rename_workspace = "prefix+r"
+workspace_picker = "prefix+w"
+next_workspace = "prefix+shift+n"
+previous_workspace = "prefix+shift+p"
+close_workspace = "prefix+shift+d"
+
+## tab (tmux の window)
+# t: 新規作成 (tmux 側で clock-mode を潰して割り当てているのと同じ)
+new_tab = "prefix+t"
+rename_tab = "prefix+comma"
+next_tab = "prefix+n"
+previous_tab = "prefix+p"
+switch_tab = "prefix+1..9"
+close_tab = "prefix+ampersand"
+
+## pane
+# %: 左右分割 / ": 上下分割 / hjkl: 移動 / HJKL: リサイズ / ;: 直前のペイン
+split_vertical = "prefix+%"
+split_horizontal = "prefix+\""
+focus_pane_left = "prefix+h"
+focus_pane_down = "prefix+j"
+focus_pane_up = "prefix+k"
+focus_pane_right = "prefix+l"
+resize_pane_left = "prefix+shift+h"
+resize_pane_down = "prefix+shift+j"
+resize_pane_up = "prefix+shift+k"
+resize_pane_right = "prefix+shift+l"
+# HJKL で直接リサイズするので resize mode は使わない (prefix+r はリネームに使う)
+resize_mode = ""
+last_pane = "prefix+semicolon"
+close_pane = "prefix+x"
+zoom = "prefix+z"
+
+## その他
+copy_mode = "prefix+["
+detach = "prefix+d"
+
+[ui]
+# ペインの見た目を tmux に寄せる
+# 外周の枠は描かず、ペイン間の区切り線だけ残す
+pane_borders = "auto"
+pane_outer_borders = false
+# 区切りは共有して 1 本にする (tmux と同じ見え方)。代わりに線の色では
+# フォーカスが分からなくなるので、どこにいるかは端末のカーソルで見る
+# (true にするとペインごとに線を持ち、フォーカス中の側だけ accent 色になる)
+pane_gaps = false
+# スクロールバーの列は使わない (tmux にはない要素)
+pane_scrollbars = false
+
+# フォーカスに追随する。{pane} は名前を付けたペインでだけ出る
+window_title = "{hostname}: {workspace} / {pane}"
+
+# ハイライトの色。dotfiles の「選択中」= ティールに合わせる
+# (青 #6A90CD は「入力待ち」の意味なので使わない)
+accent = "#5FA3A3"

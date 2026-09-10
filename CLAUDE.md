@@ -23,6 +23,7 @@ sh dotfilesLink.sh  # ~/ 以下へシンボリックリンクを張る
 | `tmux-oil` | 一括編集。`tmux-switch` から `^e` で入る。一覧を `$EDITOR` で開き、保存すると差分を tmux コマンドに変換する。`~/.local/bin` へリンク |
 | `wezterm/` | wezterm。タブバーは非表示で、情報はタイトルバーと tmux のフッターに集約 |
 | `nvim/` | Neovim (lazy.nvim)。`.vimrc` は dein ベースの旧設定で現在は未使用 |
+| `herdr/` | herdr（AI エージェント向けターミナルワークスペース）。キーバインドは tmux に合わせてある |
 | `.zshrc` / `.zprofile` | zsh。`.zprofile` から `.zshrc` を source しないこと（二重読み込みになる） |
 
 ## tmux の設計
