@@ -169,7 +169,7 @@ out=$(
   print -r -- "$list" |
   fzf --delimiter=$'\t' --with-nth=2 --no-multi --reverse --height=100% --ansi \
       --prompt='window > ' --info=inline --expect=ctrl-e \
-      --header=$'j/k move    /  search    q quit\n^r rename window   ^s rename session   ^x kill\n^t new window      ^n new session      ^e edit all\nAI  ◆ 承認待ち   ◐ 実行中   ✓ 完了   ✳ 待機' \
+      --header=$'j/k move    /  search    q quit\n^r rename window   ^s rename session   ^x kill\n^t new window      ^n new session      ^e edit all' \
       --bind="${(j:,:)ignores}" \
       --bind='j:down,k:up,g:first,G:last,q:abort' \
       --bind="$start_bind" \
