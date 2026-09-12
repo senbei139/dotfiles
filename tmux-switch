@@ -40,7 +40,8 @@ list_windows() {
   local GREEN=$'\033[38;2;52;168;83m'    YELLOW=$'\033[38;2;251;188;4m'
   local BRIGHT=$'\033[38;2;232;234;237m' DIM=$'\033[38;2;95;99;104m'
   local OFF=$'\033[0m'
-  local -A GLYPH=(blocked '◆' working '◐' done '✓' idle '✳')
+  # 状態は色だけで表す (記号は tmux-agent-state と揃えて ● に固定)
+  local -A GLYPH=(blocked '●' working '●' done '●' idle '●')
   local -A COLOR=(blocked $BLUE working $YELLOW done $GREEN idle $DIM)
 
   # ウィンドウ名には会話タイトル (日本語・空白・記号あり) が入るので、区切りには

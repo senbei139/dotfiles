@@ -40,10 +40,11 @@ ACCENT_YELLOW="#FBBC04"  # 注意      -> 実行中 (activity 通知と同じ扱
 ACCENT_GREEN="#34A853"   # 良好      -> 応答が終わった
 FG_DIM="#5F6368"         #           -> 起動しているだけ
 
-# 状態ごとの記号。緊急度の高い順に並べる (ウィンドウの集計でこの順を使う)
+# 状態は色で表す。記号は 1 つに固定して、意味は色だけに持たせる
+# 緊急度の高い順に並べる (ウィンドウの集計でこの順を使う)
 typeset -a STATE_ORDER=(blocked working done idle)
 typeset -A STATE_GLYPH STATE_COLOR
-STATE_GLYPH=(blocked '◆' working '◐' done '✓' idle '✳')
+STATE_GLYPH=(blocked '●' working '●' done '●' idle '●')
 STATE_COLOR=(blocked $ACCENT_BLUE working $ACCENT_YELLOW done $ACCENT_GREEN idle $FG_DIM)
 
 # $TMUX_PANE (%22) をファイル名にする
