@@ -21,7 +21,7 @@ sh dotfilesLink.sh  # ~/ 以下へシンボリックリンクを張る
 | `tmux-status` | tmux のステータスライン用に git の状態を生成する。`~/.local/bin` へリンク |
 | `tmux-switch` | **switch 画面**。`prefix + w` の fzf ポップアップで、セッション / ウィンドウ操作の唯一の入口。`~/.local/bin` へリンク |
 | `tmux-agent-state` | ペインで動いている Claude Code の状態を記録・集計する。Claude Code の hooks から呼ばれる。`~/.local/bin` へリンク |
-| `tmux-oil` | 一括編集。`tmux-switch` から `^e` で入る。一覧を `$EDITOR` で開き、保存すると差分を tmux コマンドに変換する。`~/.local/bin` へリンク |
+| `tmux-oil` | 一括編集。一覧を `$EDITOR` で開き、保存すると差分を tmux コマンドに変換する。switch 画面からの入口は外したので、必要なときに `tmux-oil` として直接呼ぶ。`~/.local/bin` へリンク |
 | `wezterm/` | wezterm。タブバーは非表示で、情報はタイトルバーと tmux のフッターに集約 |
 | `nvim/` | Neovim (lazy.nvim)。`.vimrc` は dein ベースの旧設定で現在は未使用 |
 | `herdr/` | herdr（AI エージェント向けターミナルワークスペース）。キーバインドは tmux に合わせてある |
@@ -31,11 +31,13 @@ sh dotfilesLink.sh  # ~/ 以下へシンボリックリンクを張る
 
 wezterm 側でタブバーを消しているため、**tmux のフッターが唯一の情報源**になっている。
 
-セッション / ウィンドウの操作は **switch 画面**（`prefix + w` = `tmux-switch`）に統合してある。
-このリポジトリではこの画面を「switch 画面」と呼ぶ（herdr 側の `prefix + w` は別実装の `goto`）。
-切り替え・リネーム・新規作成・削除はその場で、まとめて整理したいときは `^e` で
-`tmux-oil` のバッファ編集へ抜ける（`:w` で反映 / `:q!` で中止、どちらでも一覧に戻る）。
-キーの一覧は fzf のヘッダに出している。
+セッション / ウィンドウの一覧と移動は **switch 画面**（`prefix + w` = `tmux-switch`）に
+まとめてある。このリポジトリではこの画面を「switch 画面」と呼ぶ
+（herdr 側の `prefix + w` は別実装の `goto`）。
+
+**switch 画面は一覧と移動だけを担う。** リネーム・新規作成・削除はここには置かず、
+`prefix` のキー（`c` / `t` / `r`）と tmux 標準のキーを直接使う。キーが増えるほど
+一覧の役割がぼやけるので、入口を兼ねさせない方針にした。
 
 操作は vim 風のモーダルにしてある。通常モードでは文字キーをクエリに入れず
 `j` / `k` の移動を優先し、`/` を押したときだけ検索できる。`Esc` で通常モードに戻る。
