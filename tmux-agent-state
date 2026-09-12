@@ -5,6 +5,8 @@
 #   tmux-agent-state hook <state>  -> Claude Code の hooks から呼ばれて状態を書く
 #   tmux-agent-state windows       -> ウィンドウごとの状態 (tmux-switch の一覧用)
 #   tmux-agent-state status        -> ステータスライン用のセグメント
+#   tmux-agent-state sync          -> ウィンドウの @ai_state / @ai_glyph を更新する
+#   tmux-agent-state jump [state]  -> そのペインへ移動する (既定: 承認待ち -> 実行中)
 #   tmux-agent-state list          -> 確認用。ペインごとの状態と経過秒を出す
 #
 # 状態の判定を画面の文字列 (capture-pane) に頼ると、会話の本文に引っかかって誤検出する
@@ -12,13 +14,22 @@
 # そのため Claude Code 側の hooks から状態を書き込み、こちらは読むだけにしてある。
 #
 # NOTE: ステータス更新のたびに呼ばれるので、tmux の呼び出しは 1 回に抑える。
-# NOTE: ペイン ID は tmux サーバごとの通番なので、別ソケット (-L test) のサーバを
-#       同時に使うと衝突しうる。常用の default サーバだけを対象とする割り切り。
+# NOTE: ペイン ID は tmux サーバごとの通番なので、状態はソケット名で分けて置く。
+#       分けないと、検証用のサーバ (-L test) を動かしたときに互いの状態を
+#       「死んだペインの残骸」と見なして消し合う。
 
 emulate -L zsh
 zmodload zsh/datetime
 
-STATE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/tmux-agent-state"
+# 状態はソケットごとに分ける。$TMUX は "<socket>,<pid>,<session>" の形
+server_key() {
+  local info=$TMUX
+  [[ -n $info ]] || info=$(tmux display-message -p '#{socket_path}' 2>/dev/null)
+  [[ -n $info ]] || { print -r -- default; return }
+  print -r -- "${${info%%,*}:t}"
+}
+
+STATE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/tmux-agent-state/$(server_key)"
 
 # 完了の印を出しておく時間 (秒)。これを過ぎたら待機扱いにする
 DONE_TTL=600
@@ -45,6 +56,23 @@ live_panes() {
     sed 's/^%//'
 }
 
+# ウィンドウごとの代表の状態を "session:index<TAB>state" で出す。
+# 完了の印は見落とし防止のために残すが、古いものは待機に落とす (居座らせない)
+window_states() {
+  local -A win
+  local id tgt state age cur
+  while read -r id tgt state age; do
+    [[ $state == done ]] && (( age > DONE_TTL )) && state=idle
+    cur=${win[$tgt]}
+    if [[ -z $cur ]] || (( ${STATE_ORDER[(Ie)$state]} < ${STATE_ORDER[(Ie)$cur]} )); then
+      win[$tgt]=$state
+    fi
+  done < <(read_states)
+  for tgt in ${(k)win}; do
+    printf '%s\t%s\n' "$tgt" "${win[$tgt]}"
+  done
+}
+
 # 状態ファイルを読んで "pane_id state age" を出す。
 # 閉じたペインのファイルはここで捨てる (hooks には終了を伝える手段がないものもある)
 read_states() {
@@ -67,6 +95,31 @@ read_states() {
   done
 }
 
+# ウィンドウごとの印を tmux のユーザオプションに置く。
+# window-status-format の中では #() が使えないので、フッター中央の一覧はこれを読む。
+# 状態が無くなったウィンドウは unset して印を消す
+sync_windows() {
+  local -A want
+  local tgt state
+  while IFS=$'\t' read -r tgt state; do
+    want[$tgt]=$state
+  done < <(window_states)
+
+  local -a wins
+  wins=(${(f)"$(tmux list-windows -a -F '#{session_name}:#{window_index}' 2>/dev/null)"})
+  for tgt in $wins; do
+    state=${want[$tgt]}
+    if [[ -n $state ]]; then
+      tmux set -wt "$tgt" @ai_state "$state"
+      tmux set -wt "$tgt" @ai_glyph "${STATE_GLYPH[$state]}"
+    else
+      # -wtu と続けて書くと getopt が -t の引数を "u" と読んで効かない
+      tmux set -w -u -t "$tgt" @ai_state 2>/dev/null
+      tmux set -w -u -t "$tgt" @ai_glyph 2>/dev/null
+    fi
+  done
+}
+
 case $1 in
   hook)
     # Claude Code は hook の入力を stdin に JSON で渡してくる。使わないが読み捨てる
@@ -76,34 +129,26 @@ case $1 in
     [[ -n $TMUX_PANE ]] || exit 0   # tmux の外で動いているときは何もしない
     if [[ $state == clear ]]; then
       rm -f -- "$(pane_file $TMUX_PANE)"
+      sync_windows
       exit 0
     fi
     [[ -n ${STATE_GLYPH[$state]} ]] || exit 0
     mkdir -p $STATE_DIR
     printf '%s\t%s\n' "$state" "$EPOCHSECONDS" > "$(pane_file $TMUX_PANE)"
+    sync_windows
     exit 0
     ;;
 
   windows)
-    # ウィンドウに複数のペインがあるときは、緊急度の高い方を代表にする。
-    # 完了の印は見落とし防止のために残すが、古いものは待機に落とす (居座らせない)
-    local -A win
-    local id tgt state age
-    while read -r id tgt state age; do
-      [[ $state == done ]] && (( age > DONE_TTL )) && state=idle
-      local cur=${win[$tgt]}
-      if [[ -z $cur ]] || (( ${STATE_ORDER[(Ie)$state]} < ${STATE_ORDER[(Ie)$cur]} )); then
-        win[$tgt]=$state
-      fi
-    done < <(read_states)
-    for tgt in ${(k)win}; do
-      printf '%s\t%s\n' "$tgt" "${win[$tgt]}"
-    done
+    window_states
     exit 0
     ;;
 
   status)
-    # フッターには見落とすと困るものだけ出す (承認待ちと実行中)。0 件なら何も出さない
+    # フッターには見落とすと困るものだけ出す (承認待ちと実行中)。0 件なら何も出さない。
+    # 5 秒ごとに呼ばれるので、ここでウィンドウの印も更新する
+    # (hook は状態が変わったときしか来ないため、完了の期限切れやペインの消滅を拾えない)
+    sync_windows
     local -A count
     local id tgt state age out=""
     while read -r id tgt state age; do
@@ -117,6 +162,44 @@ case $1 in
     exit 0
     ;;
 
+  sync)
+    sync_windows
+    exit 0
+    ;;
+
+  jump)
+    # 承認待ち (無ければ実行中) のペインへ移動する。複数あるときは今いるペインの次へ
+    local want=$2
+    local -a blocked working picked
+    local id tgt state age
+    while read -r id tgt state age; do
+      case $state in
+        blocked) blocked+=("%$id") ;;
+        working) working+=("%$id") ;;
+      esac
+    done < <(read_states)
+
+    case $want in
+      blocked) picked=($blocked) ;;
+      working) picked=($working) ;;
+      *)       picked=(${blocked:-$working}) ;;
+    esac
+    if (( ${#picked} == 0 )); then
+      tmux display-message "AI の待ちはありません"
+      exit 0
+    fi
+
+    # 同じ状態が複数あるときは巡回する (今いるペインの次を選ぶ)
+    local cur=$(tmux display-message -p '#{pane_id}')
+    local -i i=${picked[(Ie)$cur]}
+    local target=${picked[$(( i % ${#picked} + 1 ))]}
+
+    tmux switch-client -t "$(tmux display-message -p -t "$target" '#{session_name}')"
+    tmux select-window -t "$target"
+    tmux select-pane -t "$target"
+    exit 0
+    ;;
+
   list)
     local id tgt state age
     while read -r id tgt state age; do
@@ -126,7 +209,7 @@ case $1 in
     ;;
 
   *)
-    print -u2 "usage: ${0:t} {hook <state>|windows|status|list}"
+    print -u2 "usage: ${0:t} {hook <state>|windows|status|sync|jump [state]|list}"
     exit 1
     ;;
 esac
