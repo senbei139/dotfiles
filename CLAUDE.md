@@ -19,9 +19,7 @@ sh dotfilesLink.sh  # ~/ 以下へシンボリックリンクを張る
 |---|---|
 | `.tmux.conf` | tmux。フッターと switch 画面（`prefix + w` = `choose-tree -F`）を独自に構成している |
 | `tmux-status` | tmux のステータスライン用に git の状態を生成する。`~/.local/bin` へリンク |
-| `tmux-switch` | fzf 版の switch 画面。`choose-tree -F` に置き換えたので現在は未使用（インクリメンタルサーチが要るときのため残してある）。`~/.local/bin` へリンク |
 | `tmux-agent-state` | ペインで動いている Claude Code の状態を記録・集計する。Claude Code の hooks から呼ばれる。`~/.local/bin` へリンク |
-| `tmux-oil` | 一括編集。一覧を `$EDITOR` で開き、保存すると差分を tmux コマンドに変換する。switch 画面からの入口は外したので、必要なときに `tmux-oil` として直接呼ぶ。`~/.local/bin` へリンク |
 | `wezterm/` | wezterm。タブバーは非表示で、情報はタイトルバーと tmux のフッターに集約 |
 | `nvim/` | Neovim (lazy.nvim)。`.vimrc` は dein ベースの旧設定で現在は未使用 |
 | `herdr/` | herdr（AI エージェント向けターミナルワークスペース）。キーバインドは tmux に合わせてある |
@@ -31,7 +29,7 @@ sh dotfilesLink.sh  # ~/ 以下へシンボリックリンクを張る
 
 wezterm 側でタブバーを消しているため、**tmux のフッターが唯一の情報源**になっている。
 
-セッション / ウィンドウの一覧と移動は **switch 画面**（`prefix + w` = `tmux-switch`）に
+セッション / ウィンドウの一覧と移動は **switch 画面**（`prefix + w` = `choose-tree -F`）に
 まとめてある。このリポジトリではこの画面を「switch 画面」と呼ぶ
 （herdr 側の `prefix + w` は別実装の `goto`）。
 
@@ -71,7 +69,7 @@ Claude Code のペインは `pane_current_command` がバージョン文字列 (
 
 tmux にエージェントの概念は無いので、状態は **Claude Code の hooks から書き込む**
 (`tmux-agent-state hook <state>`、割り当ては `.claude/settings.json`)。
-`tmux-switch` の一覧と、フッターの AI セグメントが同じファイルを読む。
+switch 画面（`choose-tree -F`）とフッターの AI セグメントが、同じ `@ai_state` を読む。
 
 記号は `●` に固定し、**意味は色だけに持たせる**。
 
@@ -178,9 +176,9 @@ tmux -L outer capture-pane -pe -t 0 | tail -3   # 色つき（エスケープシ
   `#[pop-default]` で囲む。** `#[default]` だと選択中の反転背景ごと消える。
   なお反転中の背景はティールなので、そこに青を乗せると 1.1:1 で読めない。
   色に意味を持たせている印は、反転表示の上では出さないのが結局いちばん素直
-- **`#{=/N/…:...}` は表示幅で数えるが、`tmux-switch` の awk 側はバイト数で数える。**
-  日本語のウィンドウ名 (会話タイトル) が入ると列がずれるので、桁揃えは zsh の
-  `${(mr:N:: :)str}` (m フラグ = 表示幅) で行う
+- **tmux の `#{=/N/…:...}` は表示幅で数えるが、awk の `printf` や `${#str}` は
+  バイト数で数える。** 日本語のウィンドウ名 (会話タイトル) を桁揃えするなら、
+  tmux の書式側か zsh の `${(mr:N:: :)str}` (m フラグ = 表示幅) を使う
 - **画面の文字列で AI の状態を判定すると会話の本文に引っかかる。**
   `esc to interrupt` や `do you want to proceed?` は説明のために表示されることがあり、
   `capture-pane` を grep する方式では誤検出する (実際に無関係なペインが承認待ちに見えた)。
@@ -188,8 +186,12 @@ tmux -L outer capture-pane -pe -t 0 | tail -3   # 色つき（エスケープシ
 - **choose-tree の tree mode のキーはハードコードで、`bind -T` では増やせない。**
   キーテーブルが存在するのは `copy-mode` / `copy-mode-vi` だけ。tree mode 内でリネームや
   新規作成をするには `:`（`%%` が選択中／tag 済みの対象に置換される）を使うしかない。
-  拡張できないので choose-tree は使わず、`prefix + w` の fzf 版に一本化してある
-  （プレビューは `--preview 'tmux capture-pane -ep -t {1}'` で代替できる）
+  switch 画面に操作を兼ねさせない方針なので、この制約は受け入れて choose-tree を使っている
+- **choose-tree にインクリメンタルサーチは無い。** `C-s` は名前で検索して**ジャンプ**
+  （`n` / `N` で次へ）、`f` は絞り込みだがフォーマットを打つ必要がある
+  （`#{m:*foo*,#{window_name}}` など）。絞り込みながら探したいなら fzf で自前に組むしかない
+- **choose-tree の `-F` は行頭のインデックスやセッション名を含まない。**
+  それらは choose-tree 側が出すので、書式で `#{session_name}` を書くと二重になる
 
 ## コミット
 

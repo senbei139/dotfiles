@@ -3,7 +3,7 @@
 # ペインで動いている生成 AI (Claude Code) の状態を記録・集計する。
 #
 #   tmux-agent-state hook <state>  -> Claude Code の hooks から呼ばれて状態を書く
-#   tmux-agent-state windows       -> ウィンドウごとの状態 (tmux-switch の一覧用)
+#   tmux-agent-state windows       -> ウィンドウごとの状態 (確認用)
 #   tmux-agent-state status        -> ステータスライン用のセグメント
 #   tmux-agent-state sync          -> ウィンドウの @ai_state / @ai_glyph を更新する
 #   tmux-agent-state jump [state]  -> そのペインへ移動する (既定: 承認待ち -> 実行中)
