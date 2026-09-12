@@ -53,6 +53,11 @@ tmux 側のエラー（名前の重複など）はポップアップが閉じる
 
 ### 生成 AI の状態
 
+Claude Code のペインは `pane_current_command` がバージョン文字列 (`2.1.267`) になって
+何も分からないので、ウィンドウ名は端末タイトル (会話のタイトルが `✳` 付きで入る) から
+取る (`automatic-rename-format`)。長くなるので表示する側で `#{=/N/…}` で畳む。
+
+
 tmux にエージェントの概念は無いので、状態は **Claude Code の hooks から書き込む**
 (`tmux-agent-state hook <state>`、割り当ては `.claude/settings.json`)。
 `tmux-switch` の一覧と、フッターの AI セグメントが同じファイルを読む。
@@ -139,6 +144,9 @@ tmux -L outer capture-pane -pe -t 0 | tail -3   # 色つき（エスケープシ
   通常モードでは文字キーを `:ignore` に潰し、`/` で `unbind(...)` して打てる状態に戻す。
   `rebind` は起動時に定義した内容しか復元できないので、同じキーをモードごとに
   違う動作にしたいときは `transform` で `$FZF_PROMPT`（= モード表示）を見て分岐する
+- **`#{=/N/…:...}` は表示幅で数えるが、`tmux-switch` の awk 側はバイト数で数える。**
+  日本語のウィンドウ名 (会話タイトル) が入ると列がずれるので、桁揃えは zsh の
+  `${(mr:N:: :)str}` (m フラグ = 表示幅) で行う
 - **画面の文字列で AI の状態を判定すると会話の本文に引っかかる。**
   `esc to interrupt` や `do you want to proceed?` は説明のために表示されることがあり、
   `capture-pane` を grep する方式では誤検出する (実際に無関係なペインが承認待ちに見えた)。

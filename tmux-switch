@@ -29,40 +29,36 @@ local FZF_COLORS='bg+:-1,fg+:-1,hl:#24C1E0,hl+:#24C1E0,prompt:#6A90CD,pointer:#5
 # 並びは #{window_activity} の降順 = 最近使った順 (choose-tree の -O time と同じ基準)
 list_windows() {
   # 生成 AI の状態はウィンドウごとに 1 文字で出す (記号と色は tmux-agent-state と揃える)
-  local states
-  states=$(${self:h}/tmux-agent-state windows 2>/dev/null)
+  local -A state
+  local tgt st
+  while IFS=$'\t' read -r tgt st; do
+    [[ -n $tgt ]] && state[$tgt]=$st
+  done < <(${self:h}/tmux-agent-state windows 2>/dev/null)
 
-  tmux list-windows -a -F '#{window_activity}|#{session_name}:#{window_index}|#{?window_active,●,·}|#{session_name}|#{window_name}|#{pane_current_path}' |
-    sort -t'|' -k1,1 -rn |
-    awk -F'|' -v home="$HOME" -v states="$states" '
-      BEGIN {
-        BLUE   = "\033[38;2;106;144;205m"
-        TEAL   = "\033[38;2;95;163;163m"
-        GREEN  = "\033[38;2;52;168;83m"
-        YELLOW = "\033[38;2;251;188;4m"
-        BRIGHT = "\033[38;2;232;234;237m"
-        DIM    = "\033[38;2;95;99;104m"
-        OFF    = "\033[0m"
+  local BLUE=$'\033[38;2;106;144;205m'   TEAL=$'\033[38;2;95;163;163m'
+  local GREEN=$'\033[38;2;52;168;83m'    YELLOW=$'\033[38;2;251;188;4m'
+  local BRIGHT=$'\033[38;2;232;234;237m' DIM=$'\033[38;2;95;99;104m'
+  local OFF=$'\033[0m'
+  local -A GLYPH=(blocked '◆' working '◐' done '✓' idle '✳')
+  local -A COLOR=(blocked $BLUE working $YELLOW done $GREEN idle $DIM)
 
-        GLYPH["blocked"] = "◆"; COLOR["blocked"] = BLUE     # 入力待ち
-        GLYPH["working"] = "◐"; COLOR["working"] = YELLOW    # 注意
-        GLYPH["done"]    = "✓"; COLOR["done"]    = GREEN     # 良好
-        GLYPH["idle"]    = "✳"; COLOR["idle"]    = DIM
-
-        n = split(states, lines, "\n")
-        for (i = 1; i <= n; i++) {
-          split(lines[i], kv, "\t")
-          if (kv[1] != "") state[kv[1]] = kv[2]
-        }
-      }
-      {
-        p = $6; sub("^" home, "~", p)
-        mark = ($3 == "●") ? TEAL $3 OFF : DIM $3 OFF
-        s = state[$2]
-        agent = (s == "") ? " " : COLOR[s] GLYPH[s] OFF
-        printf "%s\t%s%-10s%s%s│%s %s %s %s%-12s%s %s%s%s\n", \
-          $2, BLUE, $4, OFF, DIM, OFF, mark, agent, BRIGHT, $5, OFF, DIM, p, OFF
-      }'
+  # ウィンドウ名には会話タイトル (日本語・空白・記号あり) が入るので、区切りには
+  # そこに現れない制御文字を使う
+  local SEP=$'\x1f'
+  local activity active session name cwd mark agent
+  tmux list-windows -a -F "#{window_activity}${SEP}#{session_name}:#{window_index}${SEP}#{?window_active,●,·}${SEP}#{session_name}${SEP}#{=/24/…:#{window_name}}${SEP}#{pane_current_path}" |
+    sort -t"$SEP" -k1,1 -rn |
+    while IFS="$SEP" read -r activity tgt active session name cwd; do
+      cwd=${cwd/#$HOME/\~}
+      [[ $active == ● ]] && mark="${TEAL}${active}${OFF}" || mark="${DIM}${active}${OFF}"
+      st=${state[$tgt]}
+      [[ -n $st ]] && agent="${COLOR[$st]}${GLYPH[$st]}${OFF}" || agent=' '
+      # 桁揃えは表示幅で行う。awk の printf や ${#str} はバイト数で数えるため、
+      # 日本語のウィンドウ名が来ると列がずれる (zsh の m フラグは表示幅で数える)
+      printf '%s\t%s%s%s%s│%s %s %s %s%s%s %s%s%s\n' \
+        "$tgt" "$BLUE" "${(mr:10:: :)session}" "$OFF" "$DIM" "$OFF" \
+        "$mark" "$agent" "$BRIGHT" "${(mr:24:: :)name}" "$OFF" "$DIM" "$cwd" "$OFF"
+    done
 }
 
 # ターゲット行から書式を 1 つ取り出す
