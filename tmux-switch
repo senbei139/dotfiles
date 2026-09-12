@@ -36,7 +36,7 @@ list_windows() {
     [[ -n $tgt ]] && state[$tgt]=$st
   done < <(${self:h}/tmux-agent-state windows 2>/dev/null)
 
-  local BLUE=$'\033[38;2;106;144;205m'   TEAL=$'\033[38;2;95;163;163m'
+  local BLUE=$'\033[38;2;106;144;205m'
   local GREEN=$'\033[38;2;52;168;83m'    YELLOW=$'\033[38;2;251;188;4m'
   local BRIGHT=$'\033[38;2;232;234;237m' DIM=$'\033[38;2;95;99;104m'
   local OFF=$'\033[0m'
@@ -47,19 +47,18 @@ list_windows() {
   # ウィンドウ名には会話タイトル (日本語・空白・記号あり) が入るので、区切りには
   # そこに現れない制御文字を使う
   local SEP=$'\x1f'
-  local activity active session name cwd mark agent
-  tmux list-windows -a -F "#{window_activity}${SEP}#{session_name}:#{window_index}${SEP}#{?window_active,●,·}${SEP}#{session_name}${SEP}#{=/24/…:#{window_name}}${SEP}#{pane_current_path}" |
+  local activity session name cwd agent
+  tmux list-windows -a -F "#{window_activity}${SEP}#{session_name}:#{window_index}${SEP}#{session_name}${SEP}#{=/24/…:#{window_name}}${SEP}#{pane_current_path}" |
     sort -t"$SEP" -k1,1 -rn |
-    while IFS="$SEP" read -r activity tgt active session name cwd; do
+    while IFS="$SEP" read -r activity tgt session name cwd; do
       cwd=${cwd/#$HOME/\~}
-      [[ $active == ● ]] && mark="${TEAL}${active}${OFF}" || mark="${DIM}${active}${OFF}"
       st=${state[$tgt]}
       [[ -n $st ]] && agent="${COLOR[$st]}${GLYPH[$st]}${OFF}" || agent=' '
       # 桁揃えは表示幅で行う。awk の printf や ${#str} はバイト数で数えるため、
       # 日本語のウィンドウ名が来ると列がずれる (zsh の m フラグは表示幅で数える)
-      printf '%s\t%s%s%s%s│%s %s %s %s%s%s %s%s%s\n' \
+      printf '%s\t%s%s%s%s│%s %s %s%s%s %s%s%s\n' \
         "$tgt" "$BLUE" "${(mr:10:: :)session}" "$OFF" "$DIM" "$OFF" \
-        "$mark" "$agent" "$BRIGHT" "${(mr:24:: :)name}" "$OFF" "$DIM" "$cwd" "$OFF"
+        "$agent" "$BRIGHT" "${(mr:24:: :)name}" "$OFF" "$DIM" "$cwd" "$OFF"
     done
 }
 
