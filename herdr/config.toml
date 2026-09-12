@@ -9,10 +9,10 @@ onboarding = false
 prefix = "ctrl+space"
 
 ## workspace (tmux の session)
-# c: 新規作成 / r: リネーム / w: 選択画面 / N・P: 前後へ移動
+# c: 新規作成 / r: リネーム / w: 一覧 / N・P: 前後へ移動
 new_workspace = "prefix+c"
 rename_workspace = "prefix+r"
-# w: 選択画面。tmux-switch と同じく、j/k で移動して / で絞り込む
+# w: goto。tmux の switch 画面と同じく、j/k で移動して / で絞り込む
 # (goto は workspace / tab / pane のツリーを検索できる。素の一覧は g に退避)
 goto = "prefix+w"
 workspace_picker = "prefix+g"

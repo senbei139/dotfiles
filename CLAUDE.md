@@ -17,9 +17,9 @@ sh dotfilesLink.sh  # ~/ 以下へシンボリックリンクを張る
 
 | パス | 役割 |
 |---|---|
-| `.tmux.conf` | tmux。フッターと `prefix + w` の選択画面を独自に構成している |
+| `.tmux.conf` | tmux。フッターと switch 画面（`prefix + w`）を独自に構成している |
 | `tmux-status` | tmux のステータスライン用に git の状態を生成する。`~/.local/bin` へリンク |
-| `tmux-switch` | `prefix + w` の fzf ポップアップ。セッション / ウィンドウ操作の唯一の入口。`~/.local/bin` へリンク |
+| `tmux-switch` | **switch 画面**。`prefix + w` の fzf ポップアップで、セッション / ウィンドウ操作の唯一の入口。`~/.local/bin` へリンク |
 | `tmux-agent-state` | ペインで動いている Claude Code の状態を記録・集計する。Claude Code の hooks から呼ばれる。`~/.local/bin` へリンク |
 | `tmux-oil` | 一括編集。`tmux-switch` から `^e` で入る。一覧を `$EDITOR` で開き、保存すると差分を tmux コマンドに変換する。`~/.local/bin` へリンク |
 | `wezterm/` | wezterm。タブバーは非表示で、情報はタイトルバーと tmux のフッターに集約 |
@@ -31,7 +31,8 @@ sh dotfilesLink.sh  # ~/ 以下へシンボリックリンクを張る
 
 wezterm 側でタブバーを消しているため、**tmux のフッターが唯一の情報源**になっている。
 
-セッション / ウィンドウの操作は `prefix + w`（`tmux-switch`）に統合してある。
+セッション / ウィンドウの操作は **switch 画面**（`prefix + w` = `tmux-switch`）に統合してある。
+このリポジトリではこの画面を「switch 画面」と呼ぶ（herdr 側の `prefix + w` は別実装の `goto`）。
 切り替え・リネーム・新規作成・削除はその場で、まとめて整理したいときは `^e` で
 `tmux-oil` のバッファ編集へ抜ける（`:w` で反映 / `:q!` で中止、どちらでも一覧に戻る）。
 キーの一覧は fzf のヘッダに出している。
@@ -78,7 +79,7 @@ tmux にエージェントの概念は無いので、状態は **Claude Code の
 |---|---|
 | フッター右 | `◆` `◐` の件数だけ (見落とすと困るものに絞る)。クリックでそのペインへ移動 |
 | フッター中央のウィンドウ一覧 | ウィンドウごとの印。`window-status-format` では `#()` が使えないので、`tmux-agent-state sync` が `@ai_state` / `@ai_glyph` に置いた値を読む |
-| `prefix + w` の一覧 | ウィンドウごとの印 (`tmux-agent-state windows`) |
+| switch 画面の一覧 | ウィンドウごとの印 (`tmux-agent-state windows`) |
 
 `prefix + a` で承認待ち (無ければ実行中) のペインへ移動する。複数あるときは押すたびに巡回する。
 
@@ -91,7 +92,7 @@ hooks は Claude Code の起動時に読み込まれるので、割り当てを�
 
 ### 色の意味
 
-フッター・メッセージ・メニュー・選択画面で意味を統一している。色を足すときはこの体系に従う。
+フッター・メッセージ・メニュー・switch 画面で意味を統一している。色を足すときはこの体系に従う。
 
 | 色 | 意味 | 使用箇所 |
 |---|---|---|

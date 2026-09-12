@@ -6,7 +6,7 @@ brew install --cask wezterm
 
 # --- tmux ---
 # このリポジトリの中心。tmux-switch (prefix + w) が fzf 必須で、.zshrc も fzf 前提なので
-# セットで入れる。これが無いと選択画面が丸ごと動かない
+# セットで入れる。これが無いと switch 画面が丸ごと動かない
 brew install tmux fzf
 brew install zsh-syntax-highlighting
 
