@@ -20,6 +20,7 @@ sh dotfilesLink.sh  # ~/ 以下へシンボリックリンクを張る
 | `.tmux.conf` | tmux。フッターと `prefix + w` の選択画面を独自に構成している |
 | `tmux-status` | tmux のステータスライン用に git の状態を生成する。`~/.local/bin` へリンク |
 | `tmux-switch` | `prefix + w` の fzf ポップアップ。セッション / ウィンドウ操作の唯一の入口。`~/.local/bin` へリンク |
+| `tmux-agent-state` | ペインで動いている Claude Code の状態を記録・集計する。Claude Code の hooks から呼ばれる。`~/.local/bin` へリンク |
 | `tmux-oil` | 一括編集。`tmux-switch` から `^e` で入る。一覧を `$EDITOR` で開き、保存すると差分を tmux コマンドに変換する。`~/.local/bin` へリンク |
 | `wezterm/` | wezterm。タブバーは非表示で、情報はタイトルバーと tmux のフッターに集約 |
 | `nvim/` | Neovim (lazy.nvim)。`.vimrc` は dein ベースの旧設定で現在は未使用 |
@@ -49,6 +50,26 @@ wezterm 側でタブバーを消しているため、**tmux のフッターが�
 `^t` / `^n` は作ったウィンドウ・セッションへそのまま移動する（ポップアップは閉じる）。
 tmux 側のエラー（名前の重複など）はポップアップが閉じると読めないので、
 キー入力を待ってから一覧に戻る。
+
+### 生成 AI の状態
+
+tmux にエージェントの概念は無いので、状態は **Claude Code の hooks から書き込む**
+(`tmux-agent-state hook <state>`、割り当ては `.claude/settings.json`)。
+`tmux-switch` の一覧と、フッターの AI セグメントが同じファイルを読む。
+
+| 記号 | 状態 | 色 | hook |
+|---|---|---|---|
+| `◆` | 承認・入力待ち | 青 (入力待ち) | `Notification` |
+| `◐` | 実行中 | 黄 (注意) | `UserPromptSubmit` |
+| `✓` | 応答が終わった | 緑 (良好) | `Stop` |
+| `✳` | 起動しているだけ | グレー | `SessionStart` |
+
+`✓` は 10 分 (`DONE_TTL`) で `✳` に落として居座らせない。フッターには見落とすと
+困る `◆` と `◐` だけを件数で出す。ウィンドウに複数のペインがあるときは緊急度の
+高い方を代表にする。
+
+hooks は Claude Code の起動時に読み込まれるので、割り当てを変えたら既存の
+セッションは再起動が必要。
 
 ### 色の意味
 
@@ -118,6 +139,10 @@ tmux -L outer capture-pane -pe -t 0 | tail -3   # 色つき（エスケープシ
   通常モードでは文字キーを `:ignore` に潰し、`/` で `unbind(...)` して打てる状態に戻す。
   `rebind` は起動時に定義した内容しか復元できないので、同じキーをモードごとに
   違う動作にしたいときは `transform` で `$FZF_PROMPT`（= モード表示）を見て分岐する
+- **画面の文字列で AI の状態を判定すると会話の本文に引っかかる。**
+  `esc to interrupt` や `do you want to proceed?` は説明のために表示されることがあり、
+  `capture-pane` を grep する方式では誤検出する (実際に無関係なペインが承認待ちに見えた)。
+  状態は hooks から書かせること
 - **choose-tree の tree mode のキーはハードコードで、`bind -T` では増やせない。**
   キーテーブルが存在するのは `copy-mode` / `copy-mode-vi` だけ。tree mode 内でリネームや
   新規作成をするには `:`（`%%` が選択中／tag 済みの対象に置換される）を使うしかない。

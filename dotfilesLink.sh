@@ -15,6 +15,7 @@ ln -sf $DOTFILES_DIR/nvim/lazy-lock.json ~/.config/nvim/lazy-lock.json
 ln -sf $DOTFILES_DIR/tmux-status ~/.local/bin/tmux-status
 ln -sf $DOTFILES_DIR/tmux-switch ~/.local/bin/tmux-switch
 ln -sf $DOTFILES_DIR/tmux-oil ~/.local/bin/tmux-oil
+ln -sf $DOTFILES_DIR/tmux-agent-state ~/.local/bin/tmux-agent-state
 ln -sf $DOTFILES_DIR/lazygit/config.yml ~/.config/lazygit/config.yml
 ln -sf $DOTFILES_DIR/herdr/config.toml ~/.config/herdr/config.toml
 ln -sf $DOTFILES_DIR/wezterm/*.lua ~/.config/wezterm/

@@ -12,6 +12,10 @@
           {
             "type": "command",
             "command": "afplay /System/Library/Sounds/Submarine.aiff"
+          },
+          {
+            "type": "command",
+            "command": "\"$HOME/.local/bin/tmux-agent-state\" hook done"
           }
         ]
       }
@@ -24,6 +28,43 @@
             "type": "command",
             "command": "bash '/Users/senbei139/.claude/hooks/herdr-agent-state.sh' session",
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "\"$HOME/.local/bin/tmux-agent-state\" hook idle"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/.local/bin/tmux-agent-state\" hook working"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/.local/bin/tmux-agent-state\" hook blocked"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/.local/bin/tmux-agent-state\" hook clear"
           }
         ]
       }

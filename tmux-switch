@@ -28,21 +28,40 @@ local FZF_COLORS='bg+:-1,fg+:-1,hl:#24C1E0,hl+:#24C1E0,prompt:#6A90CD,pointer:#5
 # 色は .tmux.conf のパレットをそのまま使う (セッション名 = 青。フッターと同じ扱い)
 # 並びは #{window_activity} の降順 = 最近使った順 (choose-tree の -O time と同じ基準)
 list_windows() {
+  # 生成 AI の状態はウィンドウごとに 1 文字で出す (記号と色は tmux-agent-state と揃える)
+  local states
+  states=$(${self:h}/tmux-agent-state windows 2>/dev/null)
+
   tmux list-windows -a -F '#{window_activity}|#{session_name}:#{window_index}|#{?window_active,●,·}|#{session_name}|#{window_name}|#{pane_current_path}' |
     sort -t'|' -k1,1 -rn |
-    awk -F'|' -v home="$HOME" '
+    awk -F'|' -v home="$HOME" -v states="$states" '
       BEGIN {
         BLUE   = "\033[38;2;106;144;205m"
         TEAL   = "\033[38;2;95;163;163m"
+        GREEN  = "\033[38;2;52;168;83m"
+        YELLOW = "\033[38;2;251;188;4m"
         BRIGHT = "\033[38;2;232;234;237m"
         DIM    = "\033[38;2;95;99;104m"
         OFF    = "\033[0m"
+
+        GLYPH["blocked"] = "◆"; COLOR["blocked"] = BLUE     # 入力待ち
+        GLYPH["working"] = "◐"; COLOR["working"] = YELLOW    # 注意
+        GLYPH["done"]    = "✓"; COLOR["done"]    = GREEN     # 良好
+        GLYPH["idle"]    = "✳"; COLOR["idle"]    = DIM
+
+        n = split(states, lines, "\n")
+        for (i = 1; i <= n; i++) {
+          split(lines[i], kv, "\t")
+          if (kv[1] != "") state[kv[1]] = kv[2]
+        }
       }
       {
         p = $6; sub("^" home, "~", p)
         mark = ($3 == "●") ? TEAL $3 OFF : DIM $3 OFF
-        printf "%s\t%s%-10s%s%s│%s %s %s%-12s%s %s%s%s\n", \
-          $2, BLUE, $4, OFF, DIM, OFF, mark, BRIGHT, $5, OFF, DIM, p, OFF
+        s = state[$2]
+        agent = (s == "") ? " " : COLOR[s] GLYPH[s] OFF
+        printf "%s\t%s%-10s%s%s│%s %s %s %s%-12s%s %s%s%s\n", \
+          $2, BLUE, $4, OFF, DIM, OFF, mark, agent, BRIGHT, $5, OFF, DIM, p, OFF
       }'
 }
 
@@ -153,7 +172,7 @@ out=$(
   print -r -- "$list" |
   fzf --delimiter=$'\t' --with-nth=2 --no-multi --reverse --height=100% --ansi \
       --prompt='window > ' --info=inline --expect=ctrl-e \
-      --header=$'j/k move    /  search    q quit\n^r rename window   ^s rename session   ^x kill\n^t new window      ^n new session      ^e edit all' \
+      --header=$'j/k move    /  search    q quit\n^r rename window   ^s rename session   ^x kill\n^t new window      ^n new session      ^e edit all\nAI  ◆ 承認待ち   ◐ 実行中   ✓ 完了   ✳ 待機' \
       --bind="${(j:,:)ignores}" \
       --bind='j:down,k:up,g:first,G:last,q:abort' \
       --bind="$start_bind" \

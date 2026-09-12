@@ -1,0 +1,132 @@
+#!/bin/zsh
+#
+# ペインで動いている生成 AI (Claude Code) の状態を記録・集計する。
+#
+#   tmux-agent-state hook <state>  -> Claude Code の hooks から呼ばれて状態を書く
+#   tmux-agent-state windows       -> ウィンドウごとの状態 (tmux-switch の一覧用)
+#   tmux-agent-state status        -> ステータスライン用のセグメント
+#   tmux-agent-state list          -> 確認用。ペインごとの状態と経過秒を出す
+#
+# 状態の判定を画面の文字列 (capture-pane) に頼ると、会話の本文に引っかかって誤検出する
+# (「esc to interrupt」や「do you want to proceed?」は説明のために表示されることがある)。
+# そのため Claude Code 側の hooks から状態を書き込み、こちらは読むだけにしてある。
+#
+# NOTE: ステータス更新のたびに呼ばれるので、tmux の呼び出しは 1 回に抑える。
+# NOTE: ペイン ID は tmux サーバごとの通番なので、別ソケット (-L test) のサーバを
+#       同時に使うと衝突しうる。常用の default サーバだけを対象とする割り切り。
+
+emulate -L zsh
+zmodload zsh/datetime
+
+STATE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/tmux-agent-state"
+
+# 完了の印を出しておく時間 (秒)。これを過ぎたら待機扱いにする
+DONE_TTL=600
+
+# 色は .tmux.conf のパレットに揃える
+ACCENT_BLUE="#6A90CD"    # 入力待ち  -> 承認・入力を待っている
+ACCENT_YELLOW="#FBBC04"  # 注意      -> 実行中 (activity 通知と同じ扱い)
+ACCENT_GREEN="#34A853"   # 良好      -> 応答が終わった
+FG_DIM="#5F6368"         #           -> 起動しているだけ
+
+# 状態ごとの記号。緊急度の高い順に並べる (ウィンドウの集計でこの順を使う)
+typeset -a STATE_ORDER=(blocked working done idle)
+typeset -A STATE_GLYPH STATE_COLOR
+STATE_GLYPH=(blocked '◆' working '◐' done '✓' idle '✳')
+STATE_COLOR=(blocked $ACCENT_BLUE working $ACCENT_YELLOW done $ACCENT_GREEN idle $FG_DIM)
+
+# $TMUX_PANE (%22) をファイル名にする
+pane_file() { print -r -- "$STATE_DIR/${1#\%}" }
+
+# 生きているペインの一覧を 1 回の呼び出しで取る。
+# "22 home:3.1" の形で返す (ペイン ID の % は落とす)
+live_panes() {
+  tmux list-panes -a -F '#{pane_id} #{session_name}:#{window_index}' 2>/dev/null |
+    sed 's/^%//'
+}
+
+# 状態ファイルを読んで "pane_id state age" を出す。
+# 閉じたペインのファイルはここで捨てる (hooks には終了を伝える手段がないものもある)
+read_states() {
+  local -A target
+  local id tgt line
+  while read -r id tgt; do
+    target[$id]=$tgt
+  done < <(live_panes)
+
+  local file now=$EPOCHSECONDS state stamp
+  for file in $STATE_DIR/*(N); do
+    id=${file:t}
+    if [[ -z ${target[$id]} ]]; then
+      rm -f -- $file
+      continue
+    fi
+    IFS=$'\t' read -r state stamp < $file
+    [[ -n $state ]] || continue
+    print -r -- "$id ${target[$id]} $state $(( now - ${stamp:-$now} ))"
+  done
+}
+
+case $1 in
+  hook)
+    # Claude Code は hook の入力を stdin に JSON で渡してくる。使わないが読み捨てる
+    # (書き込み先が詰まると Claude 側が待たされるため)
+    cat >/dev/null 2>&1
+    local state=$2
+    [[ -n $TMUX_PANE ]] || exit 0   # tmux の外で動いているときは何もしない
+    if [[ $state == clear ]]; then
+      rm -f -- "$(pane_file $TMUX_PANE)"
+      exit 0
+    fi
+    [[ -n ${STATE_GLYPH[$state]} ]] || exit 0
+    mkdir -p $STATE_DIR
+    printf '%s\t%s\n' "$state" "$EPOCHSECONDS" > "$(pane_file $TMUX_PANE)"
+    exit 0
+    ;;
+
+  windows)
+    # ウィンドウに複数のペインがあるときは、緊急度の高い方を代表にする。
+    # 完了の印は見落とし防止のために残すが、古いものは待機に落とす (居座らせない)
+    local -A win
+    local id tgt state age
+    while read -r id tgt state age; do
+      [[ $state == done ]] && (( age > DONE_TTL )) && state=idle
+      local cur=${win[$tgt]}
+      if [[ -z $cur ]] || (( ${STATE_ORDER[(Ie)$state]} < ${STATE_ORDER[(Ie)$cur]} )); then
+        win[$tgt]=$state
+      fi
+    done < <(read_states)
+    for tgt in ${(k)win}; do
+      printf '%s\t%s\n' "$tgt" "${win[$tgt]}"
+    done
+    exit 0
+    ;;
+
+  status)
+    # フッターには見落とすと困るものだけ出す (承認待ちと実行中)。0 件なら何も出さない
+    local -A count
+    local id tgt state age out=""
+    while read -r id tgt state age; do
+      (( count[$state]++ ))
+    done < <(read_states)
+    for state in blocked working; do
+      (( ${count[$state]:-0} > 0 )) || continue
+      out+="#[fg=${STATE_COLOR[$state]}] ${STATE_GLYPH[$state]}${count[$state]}"
+    done
+    [[ -n $out ]] && print -rn -- "${out}#[default]"
+    exit 0
+    ;;
+
+  list)
+    local id tgt state age
+    while read -r id tgt state age; do
+      printf '%%%-4s %-12s %-8s %ds\n' "$id" "$tgt" "$state" "$age"
+    done < <(read_states)
+    exit 0
+    ;;
+
+  *)
+    print -u2 "usage: ${0:t} {hook <state>|windows|status|list}"
+    exit 1
+    ;;
+esac
