@@ -5,7 +5,7 @@
 #   tmux-agent-state hook <state>  -> Claude Code の hooks から呼ばれて状態を書く
 #   tmux-agent-state windows       -> ウィンドウごとの状態 (確認用)
 #   tmux-agent-state status        -> ステータスライン用のセグメント
-#   tmux-agent-state sync          -> ウィンドウの @ai_state / @ai_glyph を更新する
+#   tmux-agent-state sync          -> ウィンドウとペインの印 (@ai_state など) を更新する
 #   tmux-agent-state jump [state]  -> そのペインへ移動する (既定: 承認待ち -> 実行中)
 #   tmux-agent-state list          -> 確認用。ペインごとの状態と経過秒を出す
 #   tmux-agent-state explain <pane>         -> 確認用。画面の判定に使ったルールを出す
@@ -320,29 +320,46 @@ window_states() {
   done
 }
 
-# ウィンドウごとの印を tmux のユーザオプションに置く。
-# window-status-format の中では #() が使えないので、フッター中央の一覧はこれを読む。
-# 状態が無くなったウィンドウは unset して印を消す
+# 印を tmux のユーザオプションに置く。
+#   ウィンドウ: @ai_state / @ai_glyph (ペインの集計)。window-status-format の中では #() が
+#               使えないので、フッター中央の一覧と switch 画面のウィンドウの行はこれを読む
+#   ペイン:     @ai_pane_state。switch 画面でウィンドウを開いたときのペインの行が読む
+# 書式でオプションを引くとペインのオプションが先に見つかるので、名前は分けてある
+# (同じ名前だと、ウィンドウの行がアクティブペインの状態を読んでしまう)。
+# 5 秒ごとに呼ばれるので、今の値と違うものだけを 1 回の tmux 呼び出しでまとめて書く
 sync_windows() {
-  local -A want
-  local tgt state
+  local -A want_win want_pane
+  local line id tgt state age cur
   while IFS=$'\t' read -r tgt state; do
-    want[$tgt]=$state
+    want_win[$tgt]=$state
   done < <(window_states)
+  for line in $STATES; do
+    read -r id tgt state age <<< "$line"
+    want_pane[%$id]=$state
+  done
 
-  local -a wins
-  wins=(${(f)"$(tmux list-windows -a -F '#{session_name}:#{window_index}' 2>/dev/null)"})
-  for tgt in $wins; do
-    state=${want[$tgt]}
+  local -a cmds
+  while IFS=$'\t' read -r tgt cur; do
+    state=${want_win[$tgt]}
+    [[ $state == "$cur" ]] && continue
     if [[ -n $state ]]; then
-      tmux set -wt "$tgt" @ai_state "$state"
-      tmux set -wt "$tgt" @ai_glyph "${STATE_GLYPH[$state]}"
+      cmds+=(set -w -t "$tgt" @ai_state "$state" \; set -w -t "$tgt" @ai_glyph "${STATE_GLYPH[$state]}" \;)
     else
       # -wtu と続けて書くと getopt が -t の引数を "u" と読んで効かない
-      tmux set -w -u -t "$tgt" @ai_state 2>/dev/null
-      tmux set -w -u -t "$tgt" @ai_glyph 2>/dev/null
+      cmds+=(set -w -u -t "$tgt" @ai_state \; set -w -u -t "$tgt" @ai_glyph \;)
     fi
-  done
+  done < <(tmux list-windows -a -F $'#{session_name}:#{window_index}\t#{@ai_state}' 2>/dev/null)
+  while IFS=$'\t' read -r id cur; do
+    state=${want_pane[$id]}
+    [[ $state == "$cur" ]] && continue
+    if [[ -n $state ]]; then
+      cmds+=(set -p -t "$id" @ai_pane_state "$state" \;)
+    else
+      cmds+=(set -p -u -t "$id" @ai_pane_state \;)
+    fi
+  done < <(tmux list-panes -a -F $'#{pane_id}\t#{@ai_pane_state}' 2>/dev/null)
+
+  (( ${#cmds} )) && tmux "${cmds[@]}" 2>/dev/null
 }
 
 case $1 in
