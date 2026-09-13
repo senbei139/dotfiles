@@ -107,7 +107,7 @@ alias lg='lazygit'
 # lazydocker
 alias lzd='lazydocker'
 
-alias ns='caffeinate -i'
+alias nosleep='caffeinate -ims'
 alias ccu='npx ccusage@latest'
 alias cdr="cd \$(ghq root)/\$(ghq list | fzf)"
 
