@@ -15,7 +15,7 @@
           },
           {
             "type": "command",
-            "command": "\"$HOME/.local/bin/tmux-agent-state\" hook done"
+            "command": "\"$HOME/.local/bin/tmux-agent-state\" hook idle"
           }
         ]
       }

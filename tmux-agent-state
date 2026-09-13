@@ -8,18 +8,30 @@
 #   tmux-agent-state sync          -> ウィンドウの @ai_state / @ai_glyph を更新する
 #   tmux-agent-state jump [state]  -> そのペインへ移動する (既定: 承認待ち -> 実行中)
 #   tmux-agent-state list          -> 確認用。ペインごとの状態と経過秒を出す
+#   tmux-agent-state explain <pane>         -> 確認用。画面の判定に使ったルールを出す
+#   tmux-agent-state explain - [title] < f  -> 同上。画面を標準入力から読む (ルールの検証用)
 #
-# 状態の判定を画面の文字列 (capture-pane) に頼ると、会話の本文に引っかかって誤検出する
-# (「esc to interrupt」や「do you want to proceed?」は説明のために表示されることがある)。
-# そのため Claude Code 側の hooks から状態を書き込み、こちらは読むだけにしてある。
+# 状態は hooks と画面の両方から決める。
+#   hooks: Claude Code が動いているペインを記録する。画面で判定できないとき (transcript の
+#          表示中など) は hook が書いた状態を使う。hook だけでは承認したあとに実行中へ
+#          戻ったことが分からない (次に来るのは Stop) ので、状態は画面を優先する。
+#   画面:  承認待ち・実行中・待機を判定する。判定ルールは herdr から移植した (下の classify)。
+#          画面全体を grep すると会話の本文に引っかかるので、見る範囲を画面下部や
+#          入力欄に絞り、複数の文字の組み合わせで判定する。
 #
-# NOTE: ステータス更新のたびに呼ばれるので、tmux の呼び出しは 1 回に抑える。
+# NOTE: ステータス更新 (5 秒ごと) のたびに呼ばれる。画面の取得は Claude Code の
+#       ペインだけにし、1 回の実行で 1 ペインにつき 1 回に抑える。
 # NOTE: ペイン ID は tmux サーバごとの通番なので、状態はソケット名で分けて置く。
 #       分けないと、検証用のサーバ (-L test) を動かしたときに互いの状態を
 #       「死んだペインの残骸」と見なして消し合う。
 
 emulate -L zsh
+setopt extended_glob
 zmodload zsh/datetime
+zmodload zsh/pcre
+
+# \x{2800} のような文字を正規表現で扱うには UTF-8 のロケールが要る
+[[ ${LC_ALL:-${LC_CTYPE:-$LANG}} == *UTF-8* ]] || export LC_ALL=en_US.UTF-8
 
 # 状態はソケットごとに分ける。$TMUX は "<socket>,<pid>,<session>" の形
 server_key() {
@@ -31,68 +43,280 @@ server_key() {
 
 STATE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/tmux-agent-state/$(server_key)"
 
-# 完了の印を出しておく時間 (秒)。これを過ぎたら待機扱いにする
-DONE_TTL=600
-
 # 色は .tmux.conf のパレットに揃える
 ACCENT_BLUE="#6A90CD"    # 入力待ち  -> 承認・入力を待っている
 ACCENT_YELLOW="#FBBC04"  # 注意      -> 実行中 (activity 通知と同じ扱い)
-ACCENT_GREEN="#34A853"   # 良好      -> 応答が終わった
-FG_DIM="#5F6368"         #           -> 起動しているだけ
+ACCENT_GREEN="#34A853"   # 良好      -> 待機 (応答が終わった・起動しただけ)
 
 # 状態は色で表す。記号は 1 つに固定して、意味は色だけに持たせる
-# 緊急度の高い順に並べる (ウィンドウの集計でこの順を使う)
-typeset -a STATE_ORDER=(blocked working done idle)
+# 緊急度の高い順に並べる (ウィンドウの集計でこの順を使う)。
+# 「応答が終わった」と「起動しただけ」は分けない。見分けるには見たかどうかを追う必要があり、
+# 時間で区切っても意味が結びつかないため
+typeset -a STATE_ORDER=(blocked working idle)
 typeset -A STATE_GLYPH STATE_COLOR
-STATE_GLYPH=(blocked '●' working '●' done '●' idle '●')
-STATE_COLOR=(blocked $ACCENT_BLUE working $ACCENT_YELLOW done $ACCENT_GREEN idle $FG_DIM)
+STATE_GLYPH=(blocked '●' working '●' idle '●')
+STATE_COLOR=(blocked $ACCENT_BLUE working $ACCENT_YELLOW idle $ACCENT_GREEN)
 
 # $TMUX_PANE (%22) をファイル名にする
 pane_file() { print -r -- "$STATE_DIR/${1#\%}" }
 
-# 生きているペインの一覧を 1 回の呼び出しで取る。
-# "22 home:3.1" の形で返す (ペイン ID の % は落とす)
-live_panes() {
-  tmux list-panes -a -F '#{pane_id} #{session_name}:#{window_index}' 2>/dev/null |
-    sed 's/^%//'
+############ 画面の判定 ############
+#
+# herdr (https://github.com/herdrdev/herdr, Apache-2.0) の
+# src/detect/manifests/claude.toml (version 2026.09.11.1) を移植したもの。
+# Claude Code の画面が変わって判定が外れたら、herdr 側の更新を見て合わせる。
+#
+# herdr と同じく、一致したルールのうち priority が最も高いものを採る
+# (同じ priority ならファイルの先に書かれた方)。ここでは priority の高い順に並べて
+# 最初に一致したものを返す。どれにも一致しなければ待機。
+# 端末の進捗表示 (OSC 9;4) は tmux から読めないので、osc_progress_idle は移していない。
+
+typeset -a SCR           # 画面の行
+typeset TITLE            # 端末タイトル (OSC 0/2)
+typeset -i TOP LAST_RULE # 入力欄の上の罫線 / 最後の罫線の行番号 (無ければ 0)
+typeset REG LOW          # 判定に使う範囲と、その小文字版
+typeset RULE             # 一致したルール
+
+# 行が罫線か。herdr の is_horizontal_rule と同じく、─ で始まって
+# 残りが空か、─ が 3 個以上続いていれば罫線とみなす ("── WINDOWS ─" も罫線)
+is_rule() {
+  [[ $1 == [[:space:]]#─##[[:space:]]# || $1 == [[:space:]]#───* ]]
 }
 
-# ウィンドウごとの代表の状態を "session:index<TAB>state" で出す。
-# 完了の印は見落とし防止のために残すが、古いものは待機に落とす (居座らせない)
-window_states() {
-  local -A win
-  local id tgt state age cur
-  while read -r id tgt state age; do
-    [[ $state == done ]] && (( age > DONE_TTL )) && state=idle
-    cur=${win[$tgt]}
-    if [[ -z $cur ]] || (( ${STATE_ORDER[(Ie)$state]} < ${STATE_ORDER[(Ie)$cur]} )); then
-      win[$tgt]=$state
-    fi
-  done < <(read_states)
-  for tgt in ${(k)win}; do
-    printf '%s\t%s\n' "$tgt" "${win[$tgt]}"
+# SCR と TITLE から、範囲を切り出すための行番号を求める
+scan_screen() {
+  local -i i rules=0
+  TOP=0 LAST_RULE=0
+  for (( i = ${#SCR}; i >= 1; i-- )); do
+    is_rule "$SCR[i]" || continue
+    (( rules++ ))
+    (( rules == 1 )) && LAST_RULE=i
+    (( rules == 2 )) && { TOP=i; break }
   done
 }
 
-# 状態ファイルを読んで "pane_id state age" を出す。
+# 範囲を REG / LOW に置く。名前は herdr の region に揃えてある
+region() {
+  local -i i n count start
+  case $1 in
+    osc_title)    REG=$TITLE ;;
+    whole_recent) REG=${(F)SCR} ;;
+    # 罫線が無ければ画面全体
+    after_last_horizontal_rule) REG=${(F)SCR[LAST_RULE+1,-1]} ;;
+    # 入力欄 = 下から 2 本目の罫線と、最後の罫線の間
+    prompt_box_body) (( TOP )) && REG=${(F)SCR[TOP+1,LAST_RULE-1]} || REG= ;;
+    last_non_empty_above_prompt_box)
+      (( TOP )) && n=TOP-1 || n=${#SCR}
+      REG=
+      for (( i = n; i >= 1; i-- )); do
+        [[ -n ${SCR[i]//[[:space:]]/} ]] && { REG=$SCR[i]; break }
+      done
+      ;;
+    bottom_non_empty_lines\(<->\))
+      count=${${1#*\(}%\)} start=0 n=0
+      for (( i = ${#SCR}; i >= 1 && n < count; i-- )); do
+        [[ -n ${SCR[i]//[[:space:]]/} ]] && { (( n++ )); start=i }
+      done
+      (( start )) && REG=${(F)SCR[start,-1]} || REG=
+      ;;
+  esac
+  LOW=${(L)REG}
+}
+
+# herdr の contains。すべての文字列を含むか (大文字小文字は区別しない)
+has() {
+  local s
+  for s; do [[ $LOW == *"$s"* ]] || return 1; done
+}
+
+# herdr の regex。範囲全体に対して一致するか
+re() {
+  pcre_compile -- "$1" 2>/dev/null && pcre_match -- "$REG"
+}
+
+# herdr の line_regex。どのパターンも、いずれかの行に一致するか
+line_re() {
+  local p l ok
+  for p; do
+    pcre_compile -- "$p" 2>/dev/null || return 1
+    ok=
+    for l in "${(@f)REG}"; do
+      pcre_match -- "$l" && { ok=1; break }
+    done
+    [[ -n $ok ]] || return 1
+  done
+}
+
+# SCR と TITLE から状態を判定して REPLY に置く (blocked / working / idle / unknown)。
+# unknown は「判定しない」画面 (transcript の表示中など)。hooks が書いた状態を使う
+classify() {
+  scan_screen
+  RULE=
+
+  region osc_title
+  if re '^[\x{2800}-\x{28FF}\x{25D0}-\x{25D3}] '; then
+    RULE=osc_title_working REPLY=working; return
+  fi
+
+  region 'bottom_non_empty_lines(3)'
+  if has 'showing detailed transcript' &&
+     { has 'ctrl+o' 'to toggle' || has 'ctrl+e' 'show all' || has 'ctrl+e' 'collapse' ||
+       has '↑↓ scroll' || has '? for shortcuts' }; then
+    RULE=transcript_viewer REPLY=unknown; return
+  fi
+
+  region after_last_horizontal_rule
+  if has 'esc to cancel' &&
+     { has 'enter to confirm' ||
+       { has 'enter to select' &&
+         { has 'tab/arrow keys to navigate' || has 'arrow keys to navigate' ||
+           has 'arrows to navigate' || has '↑/↓ to navigate' || has '↑↓ to navigate' } } }; then
+    RULE=live_blocked_form REPLY=blocked; return
+  fi
+
+  region whole_recent
+  if has 'run a dynamic workflow?' 'esc to cancel'; then
+    RULE=dynamic_workflow_prompt REPLY=blocked; return
+  fi
+  if has 'esc to cancel' &&
+     line_re '(?i)^\s*MCP server ["\x{201C}].+["\x{201D}] requests your input\s*$' &&
+     { line_re '^\s*\x{276F}?\s*Accept\b' || line_re '^\s*\x{276F}?\s*Decline\b' }; then
+    RULE=mcp_elicitation_prompt REPLY=blocked; return
+  fi
+
+  region 'bottom_non_empty_lines(5)'
+  if line_re '^\s*/btw(?:\s|$)' '(?i)esc to close\s*$'; then
+    RULE=btw_overlay_working REPLY=working; return
+  fi
+
+  region 'bottom_non_empty_lines(12)'
+  if line_re '^\s*[⏸⏵].*esc to interrupt(?:\s|·|$)' ||
+     line_re '^\s*[\x{002A}\x{00B7}\x{2722}\x{2733}\x{2736}\x{273B}\x{273D}]\s+\S.*…(?:\s+\(\d+[smh](?:\s|·)|\s*$)'; then
+    RULE=live_turn_working REPLY=working; return
+  fi
+
+  region last_non_empty_above_prompt_box
+  if line_re '^\s*[\x{002A}\x{00B7}\x{2722}\x{2736}\x{273B}\x{273D}]\s+Waiting for [1-9]\d* background agents? to finish\s*$'; then
+    RULE=background_agents_working REPLY=working; return
+  fi
+
+  # Claude Code は処理の要約を行頭に出し、折り返しは字下げする。
+  # その形に限ることで、ユーザが入力した文字列がこの表示になりすますのを防ぐ
+  region 'bottom_non_empty_lines(12)'
+  if re '(?m)^[\x{002A}\x{00B7}\x{2722}\x{2736}\x{273B}\x{273D}][ \t]+\S[^\n]*?(?:\n[ \t]+[^\n]*?){0,3}·(?:[ \t]+|\n[ \t]*)[1-9]\d*(?:[ \t]+|\n[ \t]*)MCP(?:[ \t]+|\n[ \t]*)tasks?(?:[ \t]+|\n[ \t]*)still(?:[ \t]+|\n[ \t]*)running[ \t]*$' &&
+     ! { has 'do you want to proceed?' || has 'esc to cancel' || has 'waiting for permission' ||
+         has 'do you want to allow this connection?' || has 'tab to amend' || has 'ctrl+e to explain' }; then
+    RULE=background_mcp_task_working REPLY=working; return
+  fi
+
+  region prompt_box_body
+  if line_re '^\s*❯' &&
+     ! { has 'enter to select' || has 'esc to cancel' || has 'tab/arrow keys' ||
+         has 'arrow keys to navigate' || has '↑/↓ to navigate' }; then
+    RULE=live_prompt_box REPLY=idle; return
+  fi
+
+  region whole_recent
+  if has 'select model' 'enter to set as default' 'esc to cancel' &&
+     ! { has 'do you want to proceed?' || has 'enter to select' }; then
+    RULE=model_picker_menu REPLY=unknown; return
+  fi
+
+  # 選択中の選択肢には ❯ が付くので、どの選択肢の行にも ❯ を許す
+  if has 'do you want to proceed?' &&
+     { has 'bash command' || has 'bash(' || has 'contains expansion' ||
+       has 'tab to amend' || has 'ctrl+e to explain' } &&
+     line_re '(?i)^\s*❯?\s*(?:yes\b|[12]\.\s*yes\b|[23]\.\s*no\b)'; then
+    RULE=bash_permission_prompt REPLY=blocked; return
+  fi
+
+  region after_last_horizontal_rule
+  if has 'do you want to proceed?' 'esc to cancel' &&
+     line_re '(?i)^\s*(?:❯?\s*1\.\s*yes\b|2\.\s*yes\b|2\.\s*no\b|3\.\s*no\b)'; then
+    RULE=generic_permission_prompt REPLY=blocked; return
+  fi
+
+  region whole_recent
+  if { { has 'do you want to' && { has 'yes' || has '❯' } } ||
+       { has 'would you like to' && { has 'yes' || has '❯' } } ||
+       has 'waiting for permission' || has 'do you want to allow this connection?' ||
+       has 'tab to amend' || has 'ctrl+e to explain' || has 'do you want to proceed?' 'esc to cancel' ||
+       has 'review your answers' || has 'skip interview and plan immediately' } &&
+     ! re '(?m)^\s*❯\s*$'; then
+    RULE=legacy_no_prompt_blocker REPLY=blocked; return
+  fi
+
+  region osc_title
+  if re '^\x{2733} '; then
+    RULE=osc_title_idle REPLY=idle; return
+  fi
+
+  RULE=fallback REPLY=idle
+}
+
+# ペインの画面とタイトルを読んで判定する
+classify_pane() {
+  SCR=("${(@f)$(tmux capture-pane -p -t "$1" 2>/dev/null)}")
+  TITLE=$2
+  classify
+}
+
+############ 状態の集計 ############
+
+# 生きているペインの一覧を 1 回の呼び出しで取る。
+# "22 home:3 <タイトル>" の形で返す (ペイン ID の % は落とす)
+live_panes() {
+  tmux list-panes -a -F '#{pane_id} #{session_name}:#{window_index} #{pane_title}' 2>/dev/null |
+    sed 's/^%//'
+}
+
+# hooks が書いた状態と画面の判定を合わせて "pane_id target state age" を出す。
 # 閉じたペインのファイルはここで捨てる (hooks には終了を伝える手段がないものもある)
 read_states() {
-  local -A target
-  local id tgt line
-  while read -r id tgt; do
-    target[$id]=$tgt
+  local -A target title
+  local id tgt ttl
+  while read -r id tgt ttl; do
+    target[$id]=$tgt title[$id]=$ttl
   done < <(live_panes)
 
-  local file now=$EPOCHSECONDS state stamp
+  local file now=$EPOCHSECONDS stored stamp state
   for file in $STATE_DIR/*(N); do
     id=${file:t}
     if [[ -z ${target[$id]} ]]; then
       rm -f -- $file
       continue
     fi
-    IFS=$'\t' read -r state stamp < $file
-    [[ -n $state ]] || continue
-    print -r -- "$id ${target[$id]} $state $(( now - ${stamp:-$now} ))"
+    IFS=$'\t' read -r stored stamp < $file
+    [[ -n $stored ]] || continue
+    stamp=${stamp:-$now}
+
+    # 画面を優先し、判定しない画面のときだけ hooks が書いた状態を使う
+    classify_pane "%$id" "${title[$id]}"
+    [[ $REPLY == unknown ]] && state=$stored || state=$REPLY
+    print -r -- "$id ${target[$id]} $state $(( now - stamp ))"
+  done
+}
+
+# 画面の取得は重いので、1 回の実行で 1 度だけ読んで STATES に置く。
+# (<(...) の中で読むとサブシェルになって置いた値が残らないため、ここで明示的に読む)
+typeset -a STATES
+load_states() {
+  STATES=(${(f)"$(read_states)"})
+}
+
+# ウィンドウごとの代表の状態を "session:index<TAB>state" で出す
+window_states() {
+  local -A win
+  local line id tgt state age cur
+  for line in $STATES; do
+    read -r id tgt state age <<< "$line"
+    cur=${win[$tgt]}
+    if [[ -z $cur ]] || (( ${STATE_ORDER[(Ie)$state]} < ${STATE_ORDER[(Ie)$cur]} )); then
+      win[$tgt]=$state
+    fi
+  done
+  for tgt in ${(k)win}; do
+    printf '%s\t%s\n' "$tgt" "${win[$tgt]}"
   done
 }
 
@@ -130,17 +354,25 @@ case $1 in
     [[ -n $TMUX_PANE ]] || exit 0   # tmux の外で動いているときは何もしない
     if [[ $state == clear ]]; then
       rm -f -- "$(pane_file $TMUX_PANE)"
+      load_states
       sync_windows
       exit 0
     fi
     [[ -n ${STATE_GLYPH[$state]} ]] || exit 0
     mkdir -p $STATE_DIR
-    printf '%s\t%s\n' "$state" "$EPOCHSECONDS" > "$(pane_file $TMUX_PANE)"
+    local file=$(pane_file $TMUX_PANE)
+    # 承認待ちは画面から判定するので、Notification では書き換えずに印の更新だけ急がせる。
+    # Notification は入力が 60 秒無いときにも来るため、承認待ちとは限らない
+    if [[ $state != blocked || ! -s $file ]]; then
+      printf '%s\t%s\n' "$state" "$EPOCHSECONDS" > "$file"
+    fi
+    load_states
     sync_windows
     exit 0
     ;;
 
   windows)
+    load_states
     window_states
     exit 0
     ;;
@@ -148,13 +380,16 @@ case $1 in
   status)
     # フッターには見落とすと困るものだけ出す (承認待ちと実行中)。0 件なら何も出さない。
     # 5 秒ごとに呼ばれるので、ここでウィンドウの印も更新する
-    # (hook は状態が変わったときしか来ないため、完了の期限切れやペインの消滅を拾えない)
+    # (hook は状態が変わったときしか来ないため、ペインの消滅や、
+    #  画面から判定する承認待ち・実行中の変化を拾えない)
+    load_states
     sync_windows
     local -A count
-    local id tgt state age out=""
-    while read -r id tgt state age; do
+    local line id tgt state age out=""
+    for line in $STATES; do
+      read -r id tgt state age <<< "$line"
       (( count[$state]++ ))
-    done < <(read_states)
+    done
     for state in blocked working; do
       (( ${count[$state]:-0} > 0 )) || continue
       out+="#[fg=${STATE_COLOR[$state]}] ${STATE_GLYPH[$state]}${count[$state]}"
@@ -164,6 +399,7 @@ case $1 in
     ;;
 
   sync)
+    load_states
     sync_windows
     exit 0
     ;;
@@ -172,13 +408,15 @@ case $1 in
     # 承認待ち (無ければ実行中) のペインへ移動する。複数あるときは今いるペインの次へ
     local want=$2
     local -a blocked working picked
-    local id tgt state age
-    while read -r id tgt state age; do
+    local line id tgt state age
+    load_states
+    for line in $STATES; do
+      read -r id tgt state age <<< "$line"
       case $state in
         blocked) blocked+=("%$id") ;;
         working) working+=("%$id") ;;
       esac
-    done < <(read_states)
+    done
 
     case $want in
       blocked) picked=($blocked) ;;
@@ -202,15 +440,30 @@ case $1 in
     ;;
 
   list)
-    local id tgt state age
-    while read -r id tgt state age; do
+    local line id tgt state age
+    load_states
+    for line in $STATES; do
+      read -r id tgt state age <<< "$line"
       printf '%%%-4s %-12s %-8s %ds\n' "$id" "$tgt" "$state" "$age"
-    done < <(read_states)
+    done
+    exit 0
+    ;;
+
+  explain)
+    if [[ $2 == - ]]; then
+      SCR=("${(@f)$(cat)}")
+      TITLE=$3
+      classify
+    else
+      local pane=${2:-$TMUX_PANE}
+      classify_pane "$pane" "$(tmux display-message -p -t "$pane" '#{pane_title}')"
+    fi
+    print -r -- "$REPLY $RULE"
     exit 0
     ;;
 
   *)
-    print -u2 "usage: ${0:t} {hook <state>|windows|status|sync|jump [state]|list}"
+    print -u2 "usage: ${0:t} {hook <state>|windows|status|sync|jump [state]|list|explain <pane>}"
     exit 1
     ;;
 esac
