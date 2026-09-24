@@ -1,4 +1,4 @@
-export PATH=/usr/local/bin:/usr/bin:/bin:/sbin:/usr/sbin:/usr/local/sbin:/.orbstack/bin
+export PATH=/usr/local/bin:/usr/bin:/bin:/sbin:/usr/sbin:/usr/local/sbin
 export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
 export PATH="$PATH":"$HOME/.pub-cache/bin"
 
@@ -115,8 +115,6 @@ alias cdr="cd \$(ghq root)/\$(ghq list | fzf)"
 imgcat() {
   wezterm imgcat ${1}
 }
-
-export PATH="$PATH:$HOME/.orbstack/bin"
 
 # bun completions
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
