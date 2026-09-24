@@ -1,6 +1,7 @@
 export PATH=/usr/local/bin:/usr/bin:/bin:/sbin:/usr/sbin:/usr/local/sbin
 export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
 export PATH="$PATH":"$HOME/.pub-cache/bin"
+export PATH="$HOME/.docker/bin:$PATH"  # Docker Desktop
 
 # java
 export PATH="/opt/homebrew/opt/openjdk@17/bin:$PATH"
@@ -49,6 +50,8 @@ export PATH=$PATH:$GOPATH/bin
 #
 # git
 fpath=($(brew --prefix)/share/zsh/site-functions $fpath)
+# Docker Desktop が末尾に追記する補完設定は compinit をもう一度走らせるので、ここで fpath に足す
+fpath=($HOME/.docker/completions $fpath)
 autoload -Uz compinit
 # compinit のフル実行は 300ms 近くかかる。ダンプが 24 時間以内なら検証を省く (-C)。
 # NOTE: glob 修飾子は配列代入の文脈でのみ評価される。[[ -n ~/.zcompdump(#q...) ]] と書くと
