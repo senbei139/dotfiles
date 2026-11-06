@@ -159,6 +159,11 @@ tmux -L outer capture-pane -pe -t 0 | tail -3   # 色つき（エスケープシ
 
 ## 踏んだ罠
 
+- **tmux 3.8 は WezTerm に左右マージン (DECSLRM) を使い、隣のペインやフッターが黒く消える。**
+  XTVERSION で WezTerm と分かると `margins` を自動で有効にし、縦分割したペインのスクロールを
+  外側の端末に任せる。WezTerm 20240203 はこれを正しく扱えない。自動検出した feature は
+  `terminal-features` では外せないので、`terminal-overrides` で `Enmg@:Dsmg@:Clmg@:Cmg@` と
+  ケーパビリティを潰す。overrides は**クライアントの接続時**に効くので、付け直すまで反映されない
 - **tmux 3.6a の `#{S:A,B}`（セッション反復の 2 引数形式）はサーバごとクラッシュする。**
   `#{W:A,B}` は安全。セッションごとに書式を変えたいときは
   `#{?#{==:#{session_name},#{client_session}},...}` で代用する
